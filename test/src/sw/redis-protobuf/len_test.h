@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class LenTest : public ProtoTest {
-public:
-    explicit LenTest(sw::redis::Redis &r) : ProtoTest("PB.LEN", r) {}
+ public:
+  explicit LenTest(sw::redis::Redis& r) : ProtoTest("PB.LEN", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_LEN_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_LEN_TEST_H

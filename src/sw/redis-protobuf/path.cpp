@@ -15,51 +15,52 @@
  *************************************************************************/
 
 #include "path.h"
+
 #include "errors.h"
 
 namespace sw {
-    
+
 namespace redis {
-    
+
 namespace pb {
 
-Path::Path(const StringView &type, const StringView &path) :
-    _type(type.data(), type.size()), _fields(_parse_fields(path)) {}
+Path::Path(const StringView& type, const StringView& path)
+    : _type(type.data(), type.size()), _fields(_parse_fields(path)) {}
 
-std::vector<std::string> Path::_parse_fields(const StringView &path) const {
-    if (path.size() <= 1) {
-        throw Error("empty path");
-    }
+std::vector<std::string> Path::_parse_fields(const StringView& path) const {
+  if (path.size() <= 1) {
+    throw Error("empty path");
+  }
 
-    if (*(path.data()) != '/') {
-        throw Error("invalid path: should begin with /");
-    }
+  if (*(path.data()) != '/') {
+    throw Error("invalid path: should begin with /");
+  }
 
-    std::vector<std::string> fields;
-    auto start = 1U;
-    const auto *ptr = path.data();
-    for (auto idx = start; idx != path.size(); ++idx) {
-        if (ptr[idx] == '/') {
-            if (idx <= start) {
-                throw Error("empty field");
-            }
-
-            fields.emplace_back(ptr + start, idx - start);
-            start = idx + 1;
-        }
-    }
-
-    if (path.size() <= start) {
+  std::vector<std::string> fields;
+  auto start = 1U;
+  const auto* ptr = path.data();
+  for (auto idx = start; idx != path.size(); ++idx) {
+    if (ptr[idx] == '/') {
+      if (idx <= start) {
         throw Error("empty field");
+      }
+
+      fields.emplace_back(ptr + start, idx - start);
+      start = idx + 1;
     }
+  }
 
-    fields.emplace_back(ptr + start, path.size() - start);
+  if (path.size() <= start) {
+    throw Error("empty field");
+  }
 
-    return fields;
+  fields.emplace_back(ptr + start, path.size() - start);
+
+  return fields;
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

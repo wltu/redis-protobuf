@@ -17,12 +17,13 @@
 #ifndef SEWENEW_REDISPROTOBUF_LAST_IMPORT_COMMAND_H
 #define SEWENEW_REDISPROTOBUF_LAST_IMPORT_COMMAND_H
 
-#include "module_api.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "utils.h"
+
 #include "field_ref.h"
+#include "module_api.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -36,14 +37,14 @@ namespace pb {
 //          call to this command. Once this command is called, the underlying
 //          records will be cleared.
 class LastImportCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_LAST_IMPORT_COMMAND_H
+#endif  // end SEWENEW_REDISPROTOBUF_LAST_IMPORT_COMMAND_H

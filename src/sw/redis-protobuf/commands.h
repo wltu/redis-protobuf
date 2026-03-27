@@ -27,14 +27,14 @@ namespace pb {
 
 namespace cmd {
 
-void create_commands(RedisModuleCtx *ctx);
+void create_commands(RedisModuleCtx* ctx);
 
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_COMMANDS_H

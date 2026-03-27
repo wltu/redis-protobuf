@@ -17,17 +17,19 @@
 #ifndef SEWENEW_REDISPROTOBUF_PROTO_FACTORY_H
 #define SEWENEW_REDISPROTOBUF_PROTO_FACTORY_H
 
-#include <string>
-#include <atomic>
-#include <mutex>
-#include <shared_mutex>
-#include <thread>
-#include <condition_variable>
-#include <unordered_map>
-#include <unordered_set>
-#include <google/protobuf/message.h>
 #include <google/protobuf/compiler/importer.h>
 #include <google/protobuf/dynamic_message.h>
+#include <google/protobuf/message.h>
+
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <shared_mutex>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <unordered_set>
+
 #include "utils.h"
 
 namespace sw {
@@ -37,112 +39,102 @@ namespace redis {
 namespace pb {
 
 class FactoryErrorCollector : public gp::compiler::MultiFileErrorCollector {
-public:
-    virtual void AddError(const std::string &file_name,
-                            int line,
-                            int column,
-                            const std::string &message) override {
-        _add_error("error", file_name, line, column, message);
-    }
+ public:
+  virtual void AddError(const std::string& file_name, int line, int column,
+                        const std::string& message) override {
+    _add_error("error", file_name, line, column, message);
+  }
 
-    virtual void AddWarning(const std::string &file_name,
-                            int line,
-                            int column,
-                            const std::string &message) override {
-        _add_error("warning", file_name, line, column, message);
-    }
+  virtual void AddWarning(const std::string& file_name, int line, int column,
+                          const std::string& message) override {
+    _add_error("warning", file_name, line, column, message);
+  }
 
-    std::string last_errors() const;
+  std::string last_errors() const;
 
-    bool has_error() const {
-        return !_errors.empty();
-    }
+  bool has_error() const { return !_errors.empty(); }
 
-    void clear() {
-        _errors.clear();
-    }
+  void clear() { _errors.clear(); }
 
-private:
-    void _add_error(const std::string &type,
-                    const std::string &filename,
-                    int line,
-                    int column,
-                    const std::string &message);
+ private:
+  void _add_error(const std::string& type, const std::string& filename,
+                  int line, int column, const std::string& message);
 
-    std::vector<std::string> _errors;
+  std::vector<std::string> _errors;
 };
 
 class ProtoFactory {
-public:
-    explicit ProtoFactory(const std::string &proto_dir);
+ public:
+  explicit ProtoFactory(const std::string& proto_dir);
 
-    ProtoFactory(const ProtoFactory &) = delete;
-    ProtoFactory& operator=(const ProtoFactory &) = delete;
+  ProtoFactory(const ProtoFactory&) = delete;
+  ProtoFactory& operator=(const ProtoFactory&) = delete;
 
-    ProtoFactory(ProtoFactory &&) = delete;
-    ProtoFactory& operator=(ProtoFactory &&) = delete;
+  ProtoFactory(ProtoFactory&&) = delete;
+  ProtoFactory& operator=(ProtoFactory&&) = delete;
 
-    ~ProtoFactory();
+  ~ProtoFactory();
 
-    MsgUPtr create(const std::string &type);
+  MsgUPtr create(const std::string& type);
 
-    MsgUPtr create(const std::string &type, const StringView &sv);
+  MsgUPtr create(const std::string& type, const StringView& sv);
 
-    const gp::Descriptor* descriptor(const std::string &type);
+  const gp::Descriptor* descriptor(const std::string& type);
 
-    void load(const std::string &file, const std::string &content);
+  void load(const std::string& file, const std::string& content);
 
-    std::unordered_map<std::string, std::string> last_loaded();
+  std::unordered_map<std::string, std::string> last_loaded();
 
-private:
-    void _load_protos(const std::string &proto_dir);
+ private:
+  void _load_protos(const std::string& proto_dir);
 
-    void _load(const std::string &file);
+  void _load(const std::string& file);
 
-    void _load(const std::string &filename, const std::string &content);
+  void _load(const std::string& filename, const std::string& content);
 
-    std::string _canonicalize_path(std::string proto_dir) const;
+  std::string _canonicalize_path(std::string proto_dir) const;
 
-    void _async_load();
+  void _async_load();
 
-    void _dump_to_disk(const std::string &filename, const std::string &content) const;
+  void _dump_to_disk(const std::string& filename,
+                     const std::string& content) const;
 
-    std::string _absolute_path(const std::string &path) const;
+  std::string _absolute_path(const std::string& path) const;
 
-    // Dir where .proto file are saved.
-    std::string _proto_dir;
+  // Dir where .proto file are saved.
+  std::string _proto_dir;
 
-    gp::compiler::DiskSourceTree _source_tree;
+  gp::compiler::DiskSourceTree _source_tree;
 
-    FactoryErrorCollector _error_collector;
+  FactoryErrorCollector _error_collector;
 
-    gp::compiler::Importer _importer;
+  gp::compiler::Importer _importer;
 
-    gp::DynamicMessageFactory _factory;
+  gp::DynamicMessageFactory _factory;
 
-    std::unordered_map<std::string, const gp::Descriptor*> _descriptor_cache;
+  std::unordered_map<std::string, const gp::Descriptor*> _descriptor_cache;
 
-    std::unordered_set<std::string> _loaded_files;
+  std::unordered_set<std::string> _loaded_files;
 
-    std::mutex _mtx;
+  std::mutex _mtx;
 
-    std::condition_variable _cv;
+  std::condition_variable _cv;
 
-    // map<file, content>
-    std::unordered_map<std::string, std::string> _tasks;
+  // map<file, content>
+  std::unordered_map<std::string, std::string> _tasks;
 
-    // map<file, load status>
-    std::unordered_map<std::string, std::string> _last_loaded_files;
+  // map<file, load status>
+  std::unordered_map<std::string, std::string> _last_loaded_files;
 
-    std::atomic<bool> _stop_loader{false};
+  std::atomic<bool> _stop_loader{false};
 
-    std::thread _async_loader;
+  std::thread _async_loader;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_PROTO_FACTORY_H
+#endif  // end SEWENEW_REDISPROTOBUF_PROTO_FACTORY_H

@@ -17,9 +17,10 @@
 #ifndef SEWENEW_REDISPROTOBUF_TYPE_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_TYPE_COMMANDS_H
 
-#include "module_api.h"
 #include <string>
 #include <vector>
+
+#include "module_api.h"
 #include "utils.h"
 
 namespace sw {
@@ -32,23 +33,23 @@ namespace pb {
 // return:  Simple string reply: the protobuf type of the key.
 //          If key doesn't exist, return a nil reply.
 class TypeCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        RedisModuleString *key_name;
-    };
+ private:
+  struct Args {
+    RedisModuleString* key_name;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    std::string _format_type(std::string type) const;
+  std::string _format_type(std::string type) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TYPE_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_TYPE_COMMANDS_H

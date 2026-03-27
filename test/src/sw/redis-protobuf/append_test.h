@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class AppendTest : public ProtoTest {
-public:
-    explicit AppendTest(sw::redis::Redis &r) : ProtoTest("PB.APPEND", r) {}
+ public:
+  explicit AppendTest(sw::redis::Redis& r) : ProtoTest("PB.APPEND", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_APPEND_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_APPEND_TEST_H

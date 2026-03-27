@@ -15,9 +15,11 @@
  *************************************************************************/
 
 #include "options.h"
+
 #include <vector>
-#include "redis_protobuf.h"
+
 #include "errors.h"
+#include "redis_protobuf.h"
 #include "utils.h"
 
 namespace sw {
@@ -26,37 +28,37 @@ namespace redis {
 
 namespace pb {
 
-void Options::load(RedisModuleString **argv, int argc) {
-    Options opts;
+void Options::load(RedisModuleString** argv, int argc) {
+  Options opts;
 
-    auto idx = 0;
-    while (idx < argc) {
-        auto opt = StringView(argv[idx]);
+  auto idx = 0;
+  while (idx < argc) {
+    auto opt = StringView(argv[idx]);
 
-        if (util::str_case_equal(opt, "--DIR")) {
-            if (!opts.proto_dir.empty()) {
-                throw Error("duplicate --DIR option");
-            }
+    if (util::str_case_equal(opt, "--DIR")) {
+      if (!opts.proto_dir.empty()) {
+        throw Error("duplicate --DIR option");
+      }
 
-            ++idx;
+      ++idx;
 
-            opts.proto_dir = util::sv_to_string(StringView(argv[idx]));
-        } else {
-            throw Error("unknown option: " + util::sv_to_string(opt));
-        }
-
-        ++idx;
+      opts.proto_dir = util::sv_to_string(StringView(argv[idx]));
+    } else {
+      throw Error("unknown option: " + util::sv_to_string(opt));
     }
 
-    if (opts.proto_dir.empty()) {
-        throw Error("option '--DIR dir' is required");
-    }
+    ++idx;
+  }
 
-    *this = std::move(opts);
+  if (opts.proto_dir.empty()) {
+    throw Error("option '--DIR dir' is required");
+  }
+
+  *this = std::move(opts);
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

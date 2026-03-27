@@ -17,11 +17,12 @@
 #ifndef SEWENEW_REDISPROTOBUF_DEL_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_DEL_COMMANDS_H
 
-#include "module_api.h"
 #include <string>
 #include <vector>
-#include "utils.h"
+
 #include "field_ref.h"
+#include "module_api.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -31,27 +32,28 @@ namespace pb {
 
 // command: PB.DEL key type [path]
 // return:  Integer reply: return 1, if the key exists. 0, otherwise.
-// error:   If the path doesn't exist, or the corresponding field is not an array,
+// error:   If the path doesn't exist, or the corresponding field is not an
+// array,
 //          or map or the message itself, return an error reply.
 class DelCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        RedisModuleString *key_name;
-        Path path;
-    };
+ private:
+  struct Args {
+    RedisModuleString* key_name;
+    Path path;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    void _del(gp::Message &msg, const Path &path) const;
+  void _del(gp::Message& msg, const Path& path) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_DEL_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_DEL_COMMANDS_H

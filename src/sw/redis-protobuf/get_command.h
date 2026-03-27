@@ -17,9 +17,9 @@
 #ifndef SEWENEW_REDISPROTOBUF_GET_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_GET_COMMANDS_H
 
+#include "field_ref.h"
 #include "module_api.h"
 #include "utils.h"
-#include "field_ref.h"
 
 namespace sw {
 
@@ -35,75 +35,61 @@ namespace pb {
 //          return a nil reply.
 // error:   If the path doesn't exist, or type mismatch return an error reply.
 class GetCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        RedisModuleString *key_name;
-        
-        enum class Format {
-            BINARY = 0,
-            JSON,
-            NONE
-        };
+ private:
+  struct Args {
+    RedisModuleString* key_name;
 
-        Format format = Format::NONE;
+    enum class Format { BINARY = 0, JSON, NONE };
 
-        Path path;
-    };
+    Format format = Format::NONE;
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+    Path path;
+  };
 
-    int _parse_opts(RedisModuleString **argv, int argc, Args &args) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    Args::Format _parse_format(const StringView &format) const;
+  int _parse_opts(RedisModuleString** argv, int argc, Args& args) const;
 
-    void _reply_with_nil(RedisModuleCtx *ctx) const;
+  Args::Format _parse_format(const StringView& format) const;
 
-    void _reply_with_msg(RedisModuleCtx *ctx,
-            gp::Message &msg,
-            const Args &args) const;
+  void _reply_with_nil(RedisModuleCtx* ctx) const;
 
-    void _get_scalar_field(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _reply_with_msg(RedisModuleCtx* ctx, gp::Message& msg,
+                       const Args& args) const;
 
-    void _get_array_element(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _get_scalar_field(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                         Args::Format format) const;
 
-    void _get_array(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _get_array_element(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                          Args::Format format) const;
 
-    void _get_map_element(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _get_array(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                  Args::Format format) const;
 
-    void _get_map(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _get_map_element(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                        Args::Format format) const;
 
-    void _get_map_kv(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format,
-            const gp::MapKey &key,
-            const gp::MapValueRef &value) const;
+  void _get_map(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                Args::Format format) const;
 
-    void _get_msg(RedisModuleCtx *ctx,
-            const gp::Message &msg,
-            Args::Format format) const;
+  void _get_map_kv(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                   Args::Format format, const gp::MapKey& key,
+                   const gp::MapValueRef& value) const;
 
-    void _get_field(RedisModuleCtx *ctx,
-            const ConstFieldRef &field,
-            Args::Format format) const;
+  void _get_msg(RedisModuleCtx* ctx, const gp::Message& msg,
+                Args::Format format) const;
+
+  void _get_field(RedisModuleCtx* ctx, const ConstFieldRef& field,
+                  Args::Format format) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_GET_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_GET_COMMANDS_H

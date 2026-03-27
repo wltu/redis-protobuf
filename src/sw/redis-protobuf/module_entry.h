@@ -25,12 +25,11 @@ extern "C" {
 
 #endif
 
-int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc);
+int RedisModule_OnLoad(RedisModuleCtx* ctx, RedisModuleString** argv, int argc);
 
 #ifdef __cplusplus
-
 }
 
 #endif
 
-#endif // end SEWENEW_REDISPROTOBUF_MODULE_ENTRY_H
+#endif  // end SEWENEW_REDISPROTOBUF_MODULE_ENTRY_H

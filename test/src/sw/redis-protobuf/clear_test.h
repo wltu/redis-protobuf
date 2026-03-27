@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class ClearTest : public ProtoTest {
-public:
-    explicit ClearTest(sw::redis::Redis &r) : ProtoTest("PB.CLEAR", r) {}
+ public:
+  explicit ClearTest(sw::redis::Redis& r) : ProtoTest("PB.CLEAR", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_CLEAR_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_CLEAR_TEST_H

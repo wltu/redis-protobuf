@@ -15,10 +15,11 @@
  *************************************************************************/
 
 #include "len_command.h"
+
 #include "errors.h"
+#include "field_ref.h"
 #include "redis_protobuf.h"
 #include "utils.h"
-#include "field_ref.h"
 
 namespace sw {
 
@@ -26,82 +27,84 @@ namespace redis {
 
 namespace pb {
 
-int LenCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int LenCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                    int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
+    auto args = _parse_args(argv, argc);
 
-        auto key = api::open_key(ctx, args.key_name, api::KeyMode::READONLY);
-        if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
-            RedisModule_ReplyWithLongLong(ctx, 0);
-        } else {
-            auto *msg = api::get_msg_by_key(key.get());
-            assert(msg != nullptr);
-
-            auto len = _len(*msg, args.path);
-            RedisModule_ReplyWithLongLong(ctx, len);
-        }
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
-    }
-}
-
-LenCommand::Args LenCommand::_parse_args(RedisModuleString **argv, int argc) const {
-    assert(argv != nullptr);
-
-    if (argc != 3 && argc != 4) {
-        throw WrongArityError();
-    }
-
-    Path path;
-    if (argc == 3) {
-        path = Path(argv[2]);
+    auto key = api::open_key(ctx, args.key_name, api::KeyMode::READONLY);
+    if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
+      RedisModule_ReplyWithLongLong(ctx, 0);
     } else {
-        path = Path(argv[2], argv[3]);
+      auto* msg = api::get_msg_by_key(key.get());
+      assert(msg != nullptr);
+
+      auto len = _len(*msg, args.path);
+      RedisModule_ReplyWithLongLong(ctx, len);
     }
 
-    return {argv[1], std::move(path)};
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
 }
 
-long long LenCommand::_len(gp::Message &msg, const Path &path) const {
-    if (msg.GetTypeName() != path.type()) {
-        throw Error("type mismatch");
-    }
+LenCommand::Args LenCommand::_parse_args(RedisModuleString** argv,
+                                         int argc) const {
+  assert(argv != nullptr);
 
-    if (path.empty()) {
-        // Return the length of the message.
-        return msg.ByteSizeLong();
-    }
+  if (argc != 3 && argc != 4) {
+    throw WrongArityError();
+  }
 
-    return _len(ConstFieldRef(&msg, path));
+  Path path;
+  if (argc == 3) {
+    path = Path(argv[2]);
+  } else {
+    path = Path(argv[2], argv[3]);
+  }
+
+  return {argv[1], std::move(path)};
 }
 
-long long LenCommand::_len(const ConstFieldRef &field) const {
-    if (field.is_map() || field.is_array()) {
-        return field.size();
-    }
+long long LenCommand::_len(gp::Message& msg, const Path& path) const {
+  if (msg.GetTypeName() != path.type()) {
+    throw Error("type mismatch");
+  }
 
-    // Scalar type.
-    switch (field.type()) {
+  if (path.empty()) {
+    // Return the length of the message.
+    return msg.ByteSizeLong();
+  }
+
+  return _len(ConstFieldRef(&msg, path));
+}
+
+long long LenCommand::_len(const ConstFieldRef& field) const {
+  if (field.is_map() || field.is_array()) {
+    return field.size();
+  }
+
+  // Scalar type.
+  switch (field.type()) {
     case gp::FieldDescriptor::CPPTYPE_MESSAGE:
-        return field.get_msg().ByteSizeLong();
+      return field.get_msg().ByteSizeLong();
 
     case gp::FieldDescriptor::CPPTYPE_STRING:
-        // TODO: use GetStringReference instead.
-        return field.get_string().size();
+      // TODO: use GetStringReference instead.
+      return field.get_string().size();
 
     default:
-        throw Error("cannot get length of this field");
-    }
+      throw Error("cannot get length of this field");
+  }
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
