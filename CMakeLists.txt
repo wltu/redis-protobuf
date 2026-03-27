@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 set(REDIS_PROTOBUF_VERSION "0.1.0")
 message(STATUS "redis-protobuf version: ${REDIS_PROTOBUF_VERSION}")
@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 message(STATUS "redis-protobuf build type: ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Werror -fPIC -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23 -Wall -Wextra -Werror -fPIC -Wno-unused-parameter")
 
 set(PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/sw/redis-protobuf)
 
@@ -25,16 +25,15 @@ add_library(${SHARED_LIB} SHARED ${PROJECT_SOURCE_FILES})
 # protobuf dependency
 find_path(PROTOBUF_HEADER google)
 target_include_directories(${SHARED_LIB} PUBLIC ${PROTOBUF_HEADER})
+find_package(Protobuf REQUIRED CONFIG COMPONENTS protoc)
 
-find_library(PROTOBUF_LIB libprotobuf.a)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(${SHARED_LIB} -Wl,-force_load ${PROTOBUF_LIB})
-    target_link_libraries(${SHARED_LIB} z)
-else()
-    target_link_libraries(${SHARED_LIB} -Wl,--whole-archive ${PROTOBUF_LIB} -Wl,--no-whole-archive)
-endif()
+target_link_libraries(${SHARED_LIB} 
+    PRIVATE 
+    protobuf::libprotobuf  # Replaces ${Protobuf_LIBRARIES}
+    protobuf::libprotoc    # Replaces ${Protobuf_PROTOC_LIBRARIES}
+)
 
-set_target_properties(${SHARED_LIB} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+set_target_properties(${SHARED_LIB} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} VERSION 1.0.0 SOVERSION 1)
 
 set_target_properties(${SHARED_LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 

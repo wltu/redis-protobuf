@@ -16,6 +16,8 @@
 
 #include "get_command.h"
 
+#include <string_view>
+
 #include "errors.h"
 #include "field_ref.h"
 #include "redis_protobuf.h"
@@ -69,9 +71,16 @@ GetCommand::Args GetCommand::_parse_args(RedisModuleString** argv,
   }
 
   if (pos + 2 == argc) {
-    args.path = Path(argv[pos], argv[pos + 1]);
+    if (argv[pos] == nullptr || argv[pos + 1] == nullptr) {
+      throw Error("null string");
+    }
+    args.path = Path(RedisModule_StringPtrLen(argv[pos], nullptr),
+                     RedisModule_StringPtrLen(argv[pos + 1], nullptr));
   } else {
-    args.path = Path(argv[pos]);
+    if (argv[pos] == nullptr) {
+      throw Error("null string");
+    }
+    args.path = Path(RedisModule_StringPtrLen(argv[pos], nullptr));
   }
 
   return args;
@@ -81,7 +90,10 @@ int GetCommand::_parse_opts(RedisModuleString** argv, int argc,
                             Args& args) const {
   auto idx = 2;
   while (idx < argc) {
-    auto opt = StringView(argv[idx]);
+    if (argv[idx] == nullptr) {
+      throw Error("null string");
+    }
+    auto opt = RedisModule_StringPtrLen(argv[idx], nullptr);
     if (util::str_case_equal(opt, "--FORMAT")) {
       if (idx + 1 >= argc) {
         throw Error("syntax error");
@@ -89,7 +101,10 @@ int GetCommand::_parse_opts(RedisModuleString** argv, int argc,
 
       ++idx;
 
-      args.format = _parse_format(argv[idx]);
+      if (argv[idx] == nullptr) {
+        throw Error("null string");
+      }
+      args.format = _parse_format(RedisModule_StringPtrLen(argv[idx], nullptr));
     } else {
       // Finish parsing options.
       break;
@@ -102,7 +117,7 @@ int GetCommand::_parse_opts(RedisModuleString** argv, int argc,
 }
 
 GetCommand::Args::Format GetCommand::_parse_format(
-    const StringView& format) const {
+    std::string_view format) const {
   if (util::str_case_equal(format, "BINARY")) {
     return Args::Format::BINARY;
   } else if (util::str_case_equal(format, "JSON")) {
@@ -356,8 +371,8 @@ void GetCommand::_get_map(RedisModuleCtx* ctx, const ConstFieldRef& field,
 
   auto range = field.get_map_range();
   for (auto iter = range.first; iter != range.second; ++iter) {
-    const auto& key = iter->first;
-    const auto& val = iter->second;
+    const auto& key = iter.GetKey();
+    const auto& val = iter.GetValueRef();
 
     try {
       _get_map_kv(ctx, field, format, key, val);

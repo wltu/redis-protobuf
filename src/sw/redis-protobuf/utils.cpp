@@ -38,14 +38,6 @@ namespace redis {
 
 namespace pb {
 
-StringView::StringView(RedisModuleString* str) {
-  if (str == nullptr) {
-    throw Error("null string");
-  }
-
-  _data = RedisModule_StringPtrLen(str, &_size);
-}
-
 namespace util {
 
 std::string msg_to_json(const gp::Message& msg) {
@@ -58,7 +50,7 @@ std::string msg_to_json(const gp::Message& msg) {
   return json;
 }
 
-int32_t sv_to_int32(const StringView& sv) {
+int32_t sv_to_int32(std::string_view sv) {
   try {
     return std::stoi(std::string(sv.data(), sv.size()));
   } catch (const std::exception& e) {
@@ -66,7 +58,7 @@ int32_t sv_to_int32(const StringView& sv) {
   }
 }
 
-int64_t sv_to_int64(const StringView& sv) {
+int64_t sv_to_int64(std::string_view sv) {
   try {
     return std::stoll(std::string(sv.data(), sv.size()));
   } catch (const std::exception& e) {
@@ -74,7 +66,7 @@ int64_t sv_to_int64(const StringView& sv) {
   }
 }
 
-uint32_t sv_to_uint32(const StringView& sv) {
+uint32_t sv_to_uint32(std::string_view sv) {
   try {
     // TODO: check if it's overflow
     return std::stoul(std::string(sv.data(), sv.size()));
@@ -83,7 +75,7 @@ uint32_t sv_to_uint32(const StringView& sv) {
   }
 }
 
-uint64_t sv_to_uint64(const StringView& sv) {
+uint64_t sv_to_uint64(std::string_view sv) {
   try {
     return std::stoull(std::string(sv.data(), sv.size()));
   } catch (const std::exception& e) {
@@ -91,7 +83,7 @@ uint64_t sv_to_uint64(const StringView& sv) {
   }
 }
 
-double sv_to_double(const StringView& sv) {
+double sv_to_double(std::string_view sv) {
   try {
     return std::stod(std::string(sv.data(), sv.size()));
   } catch (const std::exception& e) {
@@ -99,7 +91,7 @@ double sv_to_double(const StringView& sv) {
   }
 }
 
-float sv_to_float(const StringView& sv) {
+float sv_to_float(std::string_view sv) {
   try {
     return std::stof(std::string(sv.data(), sv.size()));
   } catch (const std::exception& e) {
@@ -107,7 +99,7 @@ float sv_to_float(const StringView& sv) {
   }
 }
 
-bool sv_to_bool(const StringView& sv) {
+bool sv_to_bool(std::string_view sv) {
   bool b = false;
   auto s = std::string(sv.data(), sv.size());
   // TODO: make it case insensitive
@@ -131,11 +123,11 @@ bool sv_to_bool(const StringView& sv) {
   return b;
 }
 
-std::string sv_to_string(const StringView& sv) {
+std::string sv_to_string(std::string_view sv) {
   return std::string(sv.data(), sv.size());
 }
 
-bool str_case_equal(const StringView& s1, const StringView& s2) {
+bool str_case_equal(std::string_view s1, std::string_view s2) {
   if (s1.size() != s2.size()) {
     return false;
   }
@@ -151,7 +143,6 @@ bool str_case_equal(const StringView& s1, const StringView& s2) {
 
   return true;
 }
-
 }  // namespace util
 
 namespace io {

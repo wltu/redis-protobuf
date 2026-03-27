@@ -61,8 +61,11 @@ auto ImportCommand::_parse_args(RedisModuleString** argv, int argc) const
   }
 
   Args args;
-  args.filename = util::sv_to_string(argv[1]);
-  args.content = util::sv_to_string(argv[2]);
+  if (argv[1] == nullptr || argv[2] == nullptr) {
+    throw Error("null string");
+  }
+  args.filename = RedisModule_StringPtrLen(argv[1], nullptr);
+  args.content = RedisModule_StringPtrLen(argv[2], nullptr);
 
   return args;
 }

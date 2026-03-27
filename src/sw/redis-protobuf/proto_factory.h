@@ -26,6 +26,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -40,14 +41,14 @@ namespace pb {
 
 class FactoryErrorCollector : public gp::compiler::MultiFileErrorCollector {
  public:
-  virtual void AddError(const std::string& file_name, int line, int column,
-                        const std::string& message) override {
-    _add_error("error", file_name, line, column, message);
+  virtual void RecordError(std::string_view filename, int line, int column,
+                           std::string_view message) override {
+    _add_error("error", filename, line, column, message);
   }
 
-  virtual void AddWarning(const std::string& file_name, int line, int column,
-                          const std::string& message) override {
-    _add_error("warning", file_name, line, column, message);
+  virtual void RecordWarning(std::string_view filename, int line, int column,
+                             std::string_view message) override {
+    _add_error("warning", filename, line, column, message);
   }
 
   std::string last_errors() const;
@@ -57,8 +58,8 @@ class FactoryErrorCollector : public gp::compiler::MultiFileErrorCollector {
   void clear() { _errors.clear(); }
 
  private:
-  void _add_error(const std::string& type, const std::string& filename,
-                  int line, int column, const std::string& message);
+  void _add_error(const std::string& type, std::string_view filename, int line,
+                  int column, std::string_view message);
 
   std::vector<std::string> _errors;
 };
@@ -77,7 +78,7 @@ class ProtoFactory {
 
   MsgUPtr create(const std::string& type);
 
-  MsgUPtr create(const std::string& type, const StringView& sv);
+  MsgUPtr create(const std::string& type, std::string_view sv);
 
   const gp::Descriptor* descriptor(const std::string& type);
 

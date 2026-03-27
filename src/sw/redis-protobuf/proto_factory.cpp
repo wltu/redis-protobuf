@@ -18,7 +18,9 @@
 
 #include <google/protobuf/util/json_util.h>
 
+#include <format>
 #include <fstream>
+#include <string_view>
 
 #include "errors.h"
 #include "utils.h"
@@ -30,12 +32,10 @@ namespace redis {
 namespace pb {
 
 void FactoryErrorCollector::_add_error(const std::string& type,
-                                       const std::string& filename, int line,
-                                       int column, const std::string& message) {
-  auto err = type + ":" + filename + ":" + std::to_string(line) + ":" +
-             std::to_string(column) + ":" + message;
-
-  _errors.push_back(std::move(err));
+                                       std::string_view filename, int line,
+                                       int column, std::string_view message) {
+  _errors.push_back(
+      std::format("{}:{}:{}:{}:{}", type, filename, line, column, message));
 }
 
 std::string FactoryErrorCollector::last_errors() const {
@@ -82,19 +82,17 @@ MsgUPtr ProtoFactory::create(const std::string& type) {
   return MsgUPtr(prototype->New());
 }
 
-MsgUPtr ProtoFactory::create(const std::string& type, const StringView& sv) {
+MsgUPtr ProtoFactory::create(const std::string& type, std::string_view sv) {
   auto msg = create(type);
 
-  const auto* ptr = sv.data();
   auto len = sv.size();
-  if (len >= 2 && ptr[0] == '{' && ptr[len - 1] == '}') {
-    auto status =
-        gp::util::JsonStringToMessage(gp::StringPiece(ptr, len), msg.get());
+  if (len >= 2 && sv[0] == '{' && sv[len - 1] == '}') {
+    auto status = gp::util::JsonStringToMessage(sv, msg.get());
     if (!status.ok()) {
       throw Error("failed to parse json to " + type + ": " + status.ToString());
     }
   } else {
-    if (!msg->ParseFromArray(ptr, len)) {
+    if (!msg->ParseFromArray(sv.data(), len)) {
       throw Error("failed to parse binary to " + type);
     }
   }

@@ -17,6 +17,7 @@
 #ifndef SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H
 
+#include <string_view>
 #include <vector>
 
 #include "field_ref.h"
@@ -42,17 +43,17 @@ class MergeCommand {
   struct Args {
     RedisModuleString* key_name;
     Path path;
-    StringView val;
+    std::string_view val;
   };
 
   Args _parse_args(RedisModuleString** argv, int argc) const;
 
   void _merge(const Args& args, gp::Message& msg) const;
 
-  void _merge_msg(const std::string& type, const StringView& val,
+  void _merge_msg(const std::string& type, std::string_view val,
                   gp::Message& msg) const;
 
-  void _merge_sub_msg(const Path& path, const StringView& val,
+  void _merge_sub_msg(const Path& path, std::string_view val,
                       gp::Message& msg) const;
 };
 

@@ -62,7 +62,11 @@ SchemaCommand::Args SchemaCommand::_parse_args(RedisModuleString** argv,
     throw WrongArityError();
   }
 
-  return {Path(argv[1]).type()};
+  if (argv[1] == nullptr) {
+    throw Error("null string");
+  }
+
+  return {Path(RedisModule_StringPtrLen(argv[1], nullptr)).type()};
 }
 
 std::string SchemaCommand::_format(const std::string& schema) const {

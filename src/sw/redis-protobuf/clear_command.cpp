@@ -69,10 +69,18 @@ ClearCommand::Args ClearCommand::_parse_args(RedisModuleString** argv,
   }
 
   Path path;
+
   if (argc == 3) {
-    path = Path(argv[2]);
+    if (argv[2] == nullptr) {
+      throw Error("null string");
+    }
+    path = Path(RedisModule_StringPtrLen(argv[2], nullptr));
   } else {
-    path = Path(argv[2], argv[3]);
+    if (argv[2] == nullptr || argv[3] == nullptr) {
+      throw Error("null string");
+    }
+    path = Path(RedisModule_StringPtrLen(argv[2], nullptr),
+                RedisModule_StringPtrLen(argv[3], nullptr));
   }
   return {argv[1], std::move(path)};
 }

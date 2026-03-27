@@ -24,10 +24,10 @@ namespace redis {
 
 namespace pb {
 
-Path::Path(const StringView& type, const StringView& path)
+Path::Path(std::string_view type, std::string_view path)
     : _type(type.data(), type.size()), _fields(_parse_fields(path)) {}
 
-std::vector<std::string> Path::_parse_fields(const StringView& path) const {
+std::vector<std::string> Path::_parse_fields(std::string_view path) const {
   if (path.size() <= 1) {
     throw Error("empty path");
   }

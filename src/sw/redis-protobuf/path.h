@@ -32,9 +32,9 @@ class Path {
  public:
   Path() = default;
 
-  Path(const StringView& type, const StringView& path);
+  Path(std::string_view type, std::string_view path);
 
-  explicit Path(const StringView& type) : _type(type.data(), type.size()) {}
+  explicit Path(std::string_view type) : _type(type.data(), type.size()) {}
 
   const std::string& type() const { return _type; }
 
@@ -43,7 +43,7 @@ class Path {
   bool empty() const { return _fields.empty(); }
 
  private:
-  std::vector<std::string> _parse_fields(const StringView& path) const;
+  std::vector<std::string> _parse_fields(std::string_view path) const;
 
   std::string _type;
 

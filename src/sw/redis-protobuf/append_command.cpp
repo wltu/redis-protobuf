@@ -16,6 +16,8 @@
 
 #include "append_command.h"
 
+#include <string_view>
+
 #include "errors.h"
 #include "redis_protobuf.h"
 
@@ -93,18 +95,27 @@ AppendCommand::Args AppendCommand::_parse_args(RedisModuleString** argv,
 
   Args args;
   args.key_name = argv[1];
-  args.path = Path(argv[2], argv[3]);
+  if (argv[2] == nullptr || argv[3] == nullptr) {
+    throw Error("null string");
+  }
+  std::string type_str(RedisModule_StringPtrLen(argv[2], nullptr));
+  std::string path_str(RedisModule_StringPtrLen(argv[3], nullptr));
+  args.path = Path(type_str, path_str);
   args.elements.reserve(argc - 4);
 
   for (auto idx = 4; idx != argc; ++idx) {
-    args.elements.emplace_back(argv[idx]);
+    if (argv[idx] == nullptr) {
+      throw Error("null string");
+    }
+    args.elements.emplace_back(RedisModule_StringPtrLen(argv[idx], nullptr));
   }
 
   return args;
 }
 
 long long AppendCommand::_append(
-    MutableFieldRef& field, const std::vector<StringView>& elements) const {
+    MutableFieldRef& field,
+    const std::vector<std::string_view>& elements) const {
   if (field.is_array() && !field.is_array_element()) {
     for (const auto& ele : elements) {
       _append_arr(field, ele);
@@ -119,7 +130,7 @@ long long AppendCommand::_append(
 }
 
 void AppendCommand::_append_arr(MutableFieldRef& field,
-                                const StringView& val) const {
+                                std::string_view val) const {
   assert(field.is_array() && !field.is_array_element());
 
   switch (field.type()) {
@@ -169,7 +180,8 @@ void AppendCommand::_append_arr(MutableFieldRef& field,
 }
 
 long long AppendCommand::_append_str(
-    MutableFieldRef& field, const std::vector<StringView>& elements) const {
+    MutableFieldRef& field,
+    const std::vector<std::string_view>& elements) const {
   std::string str;
   for (const auto& ele : elements) {
     str += std::string(ele.data(), ele.size());
@@ -188,14 +200,13 @@ long long AppendCommand::_append_str(
 }
 
 void AppendCommand::_add_msg(MutableFieldRef& field,
-                             const StringView& val) const {
+                             std::string_view val) const {
   auto msg =
       RedisProtobuf::instance().proto_factory()->create(field.msg_type(), val);
   assert(msg);
 
   field.add_msg(*msg);
 }
-
 }  // namespace pb
 
 }  // namespace redis

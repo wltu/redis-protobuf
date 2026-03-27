@@ -16,6 +16,8 @@
 
 #include "merge_command.h"
 
+#include <string_view>
+
 #include "errors.h"
 #include "field_ref.h"
 #include "redis_protobuf.h"
@@ -71,13 +73,20 @@ MergeCommand::Args MergeCommand::_parse_args(RedisModuleString** argv,
   }
 
   Path path;
-  StringView val;
+  std::string_view val;
   if (argc == 4) {
-    path = Path(argv[2]);
-    val = StringView(argv[3]);
+    if (argv[2] == nullptr || argv[3] == nullptr) {
+      throw Error("null string");
+    }
+    path = Path(RedisModule_StringPtrLen(argv[2], nullptr));
+    val = std::string_view(RedisModule_StringPtrLen(argv[3], nullptr));
   } else {
-    path = Path(argv[2], argv[3]);
-    val = StringView(argv[4]);
+    if (argv[2] == nullptr || argv[3] == nullptr || argv[4] == nullptr) {
+      throw Error("null string");
+    }
+    path = Path(RedisModule_StringPtrLen(argv[2], nullptr),
+                RedisModule_StringPtrLen(argv[3], nullptr));
+    val = std::string_view(RedisModule_StringPtrLen(argv[4], nullptr));
   }
 
   return {argv[1], std::move(path), std::move(val)};
@@ -92,7 +101,7 @@ void MergeCommand::_merge(const Args& args, gp::Message& msg) const {
   }
 }
 
-void MergeCommand::_merge_msg(const std::string& type, const StringView& val,
+void MergeCommand::_merge_msg(const std::string& type, std::string_view val,
                               gp::Message& msg) const {
   if (type != msg.GetTypeName()) {
     throw Error("type mismatch");
@@ -104,7 +113,7 @@ void MergeCommand::_merge_msg(const std::string& type, const StringView& val,
   msg.MergeFrom(*other);
 }
 
-void MergeCommand::_merge_sub_msg(const Path& path, const StringView& val,
+void MergeCommand::_merge_sub_msg(const Path& path, std::string_view val,
                                   gp::Message& msg) const {
   MutableFieldRef field(&msg, path);
   auto sub_msg =
@@ -113,7 +122,6 @@ void MergeCommand::_merge_sub_msg(const Path& path, const StringView& val,
 
   field.merge(*sub_msg);
 }
-
 }  // namespace pb
 
 }  // namespace redis

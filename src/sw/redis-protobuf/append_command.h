@@ -18,6 +18,7 @@
 #define SEWENEW_REDISPROTOBUF_APPEND_COMMANDS_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "field_ref.h"
@@ -45,20 +46,20 @@ class AppendCommand {
   struct Args {
     RedisModuleString* key_name;
     Path path;
-    std::vector<StringView> elements;
+    std::vector<std::string_view> elements;
   };
 
   Args _parse_args(RedisModuleString** argv, int argc) const;
 
   long long _append(MutableFieldRef& field,
-                    const std::vector<StringView>& elements) const;
+                    const std::vector<std::string_view>& elements) const;
 
-  void _append_arr(MutableFieldRef& field, const StringView& val) const;
+  void _append_arr(MutableFieldRef& field, std::string_view val) const;
 
   long long _append_str(MutableFieldRef& field,
-                        const std::vector<StringView>& elements) const;
+                        const std::vector<std::string_view>& elements) const;
 
-  void _add_msg(MutableFieldRef& field, const StringView& val) const;
+  void _add_msg(MutableFieldRef& field, std::string_view val) const;
 };
 
 }  // namespace pb

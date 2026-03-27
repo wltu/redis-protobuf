@@ -53,7 +53,7 @@ class GetCommand {
 
   int _parse_opts(RedisModuleString** argv, int argc, Args& args) const;
 
-  Args::Format _parse_format(const StringView& format) const;
+  Args::Format _parse_format(std::string_view format) const;
 
   void _reply_with_nil(RedisModuleCtx* ctx) const;
 

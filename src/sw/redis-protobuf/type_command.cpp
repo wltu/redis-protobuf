@@ -62,11 +62,11 @@ TypeCommand::Args TypeCommand::_parse_args(RedisModuleString** argv,
   return Args{argv[1]};
 }
 
-std::string TypeCommand::_format_type(std::string type) const {
+std::string TypeCommand::_format_type(std::string_view type) const {
   auto pos = type.find('.');
   if (pos == std::string::npos) {
     // No namespace.
-    return type;
+    return std::string(type);
   }
 
   std::string type_str;
@@ -85,7 +85,6 @@ std::string TypeCommand::_format_type(std::string type) const {
 
   return type_str;
 }
-
 }  // namespace pb
 
 }  // namespace redis

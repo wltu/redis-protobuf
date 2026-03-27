@@ -43,7 +43,7 @@ class TypeCommand {
 
   Args _parse_args(RedisModuleString** argv, int argc) const;
 
-  std::string _format_type(std::string type) const;
+  std::string _format_type(std::string_view type) const;
 };
 
 }  // namespace pb

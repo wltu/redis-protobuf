@@ -16,6 +16,7 @@
 
 #include "options.h"
 
+#include <string_view>
 #include <vector>
 
 #include "errors.h"
@@ -33,7 +34,10 @@ void Options::load(RedisModuleString** argv, int argc) {
 
   auto idx = 0;
   while (idx < argc) {
-    auto opt = StringView(argv[idx]);
+    if (argv[idx] == nullptr) {
+      throw Error("null string");
+    }
+    auto opt = std::string_view(RedisModule_StringPtrLen(argv[idx], nullptr));
 
     if (util::str_case_equal(opt, "--DIR")) {
       if (!opts.proto_dir.empty()) {
@@ -42,7 +46,10 @@ void Options::load(RedisModuleString** argv, int argc) {
 
       ++idx;
 
-      opts.proto_dir = util::sv_to_string(StringView(argv[idx]));
+      if (argv[idx] == nullptr) {
+        throw Error("null string");
+      }
+      opts.proto_dir = RedisModule_StringPtrLen(argv[idx], nullptr);
     } else {
       throw Error("unknown option: " + util::sv_to_string(opt));
     }

@@ -19,6 +19,7 @@
 #include <google/protobuf/message.h>
 
 #include <cassert>
+#include <format>
 #include <string>
 
 #include "commands.h"
@@ -210,10 +211,11 @@ std::pair<std::string, std::string> serialize_message(void* value) {
 
   std::string buf;
   if (!msg->SerializeToString(&buf)) {
-    throw Error("failed to serialize protobuf message of type " + type);
+    throw Error(
+        std::format("failed to serialize protobuf message of type {}", type));
   }
 
-  return {std::move(type), std::move(buf)};
+  return std::make_pair(std::string(type), std::move(buf));
 }
 
 }  // namespace
