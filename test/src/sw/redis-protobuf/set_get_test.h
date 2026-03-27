@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class SetGetTest : public ProtoTest {
-public:
-    explicit SetGetTest(sw::redis::Redis &r) : ProtoTest("PB.GET PB.SET", r) {}
+ public:
+  explicit SetGetTest(sw::redis::Redis& r) : ProtoTest("PB.GET PB.SET", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_SET_TEST_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_SET_TEST_TEST_H

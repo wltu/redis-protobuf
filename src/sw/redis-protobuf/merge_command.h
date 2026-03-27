@@ -17,10 +17,11 @@
 #ifndef SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H
 
-#include "module_api.h"
 #include <vector>
-#include "utils.h"
+
 #include "field_ref.h"
+#include "module_api.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -34,29 +35,31 @@ namespace pb {
 // error:   If the type doesn't match the protobuf message type of the key,
 //          or path doesn't exist, return an error reply.
 class MergeCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        RedisModuleString *key_name;
-        Path path;
-        StringView val;
-    };
+ private:
+  struct Args {
+    RedisModuleString* key_name;
+    Path path;
+    StringView val;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    void _merge(const Args &args, gp::Message &msg) const;
+  void _merge(const Args& args, gp::Message& msg) const;
 
-    void _merge_msg(const std::string &type, const StringView &val, gp::Message &msg) const;
+  void _merge_msg(const std::string& type, const StringView& val,
+                  gp::Message& msg) const;
 
-    void _merge_sub_msg(const Path &path, const StringView &val, gp::Message &msg) const;
+  void _merge_sub_msg(const Path& path, const StringView& val,
+                      gp::Message& msg) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_MERGE_COMMANDS_H

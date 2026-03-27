@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class MergeTest : public ProtoTest {
-public:
-    explicit MergeTest(sw::redis::Redis &r) : ProtoTest("PB.MERGE", r) {}
+ public:
+  explicit MergeTest(sw::redis::Redis& r) : ProtoTest("PB.MERGE", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_MERGE_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_MERGE_TEST_H

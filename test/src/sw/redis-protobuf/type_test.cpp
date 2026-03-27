@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "type_test.h"
+
 #include "utils.h"
 
 namespace sw {
@@ -25,27 +26,26 @@ namespace pb {
 
 namespace test {
 
-void TypeTest::_run(sw::redis::Redis &r) {
-    auto key = test_key("type");
+void TypeTest::_run(sw::redis::Redis& r) {
+  auto key = test_key("type");
 
-    KeyDeleter deleter(r, key);
+  KeyDeleter deleter(r, key);
 
-    REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg",
-                R"({"i" : 1})") == 1,
-            "failed to test pb.type command");
+  REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg", R"({"i" : 1})") == 1,
+               "failed to test pb.type command");
 
-    auto type = r.command<sw::redis::OptionalString>("PB.TYPE", key);
-    REDIS_ASSERT(type && *type == "Msg",
-            "failed to test pb.type command");
+  auto type = r.command<sw::redis::OptionalString>("PB.TYPE", key);
+  REDIS_ASSERT(type && *type == "Msg", "failed to test pb.type command");
 
-    type = r.command<sw::redis::OptionalString>("PB.TYPE", "sw.redis.pb.not-exist-Msg-type");
-    REDIS_ASSERT(!type, "failed to test pb.type command");
+  type = r.command<sw::redis::OptionalString>("PB.TYPE",
+                                              "sw.redis.pb.not-exist-Msg-type");
+  REDIS_ASSERT(!type, "failed to test pb.type command");
 }
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

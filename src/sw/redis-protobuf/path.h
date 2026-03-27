@@ -17,48 +17,43 @@
 #ifndef SEWENEW_REDISPROTOBUF_PATH_H
 #define SEWENEW_REDISPROTOBUF_PATH_H
 
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "utils.h"
 
 namespace sw {
-    
+
 namespace redis {
-    
+
 namespace pb {
 
 class Path {
-public:
-    Path() = default;
+ public:
+  Path() = default;
 
-    Path(const StringView &type, const StringView &path);
+  Path(const StringView& type, const StringView& path);
 
-    explicit Path(const StringView &type) : _type(type.data(), type.size()) {}
+  explicit Path(const StringView& type) : _type(type.data(), type.size()) {}
 
-    const std::string& type() const {
-        return _type;
-    }
+  const std::string& type() const { return _type; }
 
-    const std::vector<std::string>& fields() const {
-        return _fields;
-    }
+  const std::vector<std::string>& fields() const { return _fields; }
 
-    bool empty() const {
-        return _fields.empty();
-    }
+  bool empty() const { return _fields.empty(); }
 
-private:
-    std::vector<std::string> _parse_fields(const StringView &path) const;
+ private:
+  std::vector<std::string> _parse_fields(const StringView& path) const;
 
-    std::string _type;
+  std::string _type;
 
-    std::vector<std::string> _fields;
+  std::vector<std::string> _fields;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_PATH_H
+#endif  // end SEWENEW_REDISPROTOBUF_PATH_H

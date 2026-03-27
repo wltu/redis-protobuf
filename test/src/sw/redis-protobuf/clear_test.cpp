@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "clear_test.h"
+
 #include "utils.h"
 
 namespace sw {
@@ -25,44 +26,50 @@ namespace pb {
 
 namespace test {
 
-void ClearTest::_run(sw::redis::Redis &r) {
-    auto key = test_key("clear");
+void ClearTest::_run(sw::redis::Redis& r) {
+  auto key = test_key("clear");
 
-    KeyDeleter deleter(r, key);
+  KeyDeleter deleter(r, key);
 
-    REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg",
-                R"({"i" : 1, "sub" : {"s" : "hello"}, "arr" : [1, 2]})") == 1,
-            "failed to test pb.append command");
+  REDIS_ASSERT(
+      r.command<long long>(
+          "PB.SET", key, "Msg",
+          R"({"i" : 1, "sub" : {"s" : "hello"}, "arr" : [1, 2]})") == 1,
+      "failed to test pb.append command");
 
-    REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg") == 1 &&
-                r.command<long long>("PB.GET", key, "Msg", "/i") == 0,
-            "failed to test clear whole message");
+  REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg") == 1 &&
+                   r.command<long long>("PB.GET", key, "Msg", "/i") == 0,
+               "failed to test clear whole message");
 
-    REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg",
-                R"({"i" : 1, "sub" : {"s" : "hello", "i" : 23}, "arr" : [1, 2]})") == 1,
-            "failed to test pb.clear command");
+  REDIS_ASSERT(
+      r.command<long long>(
+          "PB.SET", key, "Msg",
+          R"({"i" : 1, "sub" : {"s" : "hello", "i" : 23}, "arr" : [1, 2]})") ==
+          1,
+      "failed to test pb.clear command");
 
-    REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/i") == 1 &&
-                r.command<long long>("PB.GET", key, "Msg", "/i") == 0,
-            "failed to test clear int");
+  REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/i") == 1 &&
+                   r.command<long long>("PB.GET", key, "Msg", "/i") == 0,
+               "failed to test clear int");
 
-    REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/sub/s") == 1 &&
-                r.command<std::string>("PB.GET", key, "Msg", "/sub/s").empty(),
-            "failed to test clear string");
+  REDIS_ASSERT(
+      r.command<long long>("PB.CLEAR", key, "Msg", "/sub/s") == 1 &&
+          r.command<std::string>("PB.GET", key, "Msg", "/sub/s").empty(),
+      "failed to test clear string");
 
-    REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/arr") == 1 &&
-                r.command<long long>("PB.LEN", key, "Msg", "/arr") == 0,
-            "failed to test clear array");
+  REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/arr") == 1 &&
+                   r.command<long long>("PB.LEN", key, "Msg", "/arr") == 0,
+               "failed to test clear array");
 
-    REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/sub") == 1 &&
-                r.command<long long>("PB.GET", key, "Msg", "/sub/i") == 0,
-            "failed to test clear sub message");
+  REDIS_ASSERT(r.command<long long>("PB.CLEAR", key, "Msg", "/sub") == 1 &&
+                   r.command<long long>("PB.GET", key, "Msg", "/sub/i") == 0,
+               "failed to test clear sub message");
 }
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

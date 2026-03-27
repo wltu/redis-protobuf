@@ -15,10 +15,12 @@
  *************************************************************************/
 
 #include "last_import_command.h"
+
 #include <cassert>
-#include "utils.h"
+
 #include "errors.h"
 #include "redis_protobuf.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -26,37 +28,38 @@ namespace redis {
 
 namespace pb {
 
-int LastImportCommand::run(RedisModuleCtx *ctx, RedisModuleString ** /*argv*/, int /*argc*/) const {
-    try {
-        assert(ctx != nullptr);
+int LastImportCommand::run(RedisModuleCtx* ctx, RedisModuleString** /*argv*/,
+                           int /*argc*/) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto &m = RedisProtobuf::instance();
-        auto last_loaded_files = m.proto_factory()->last_loaded();
+    auto& m = RedisProtobuf::instance();
+    auto last_loaded_files = m.proto_factory()->last_loaded();
 
-        RedisModule_ReplyWithArray(ctx, last_loaded_files.size());
+    RedisModule_ReplyWithArray(ctx, last_loaded_files.size());
 
-        for (const auto &ele : last_loaded_files) {
-            const auto &filename = ele.first;
-            const auto &status = ele.second;
+    for (const auto& ele : last_loaded_files) {
+      const auto& filename = ele.first;
+      const auto& status = ele.second;
 
-            RedisModule_ReplyWithArray(ctx, 2);
+      RedisModule_ReplyWithArray(ctx, 2);
 
-            RedisModule_ReplyWithStringBuffer(ctx, filename.data(), filename.size());
-            RedisModule_ReplyWithStringBuffer(ctx, status.data(), status.size());
-        }
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
+      RedisModule_ReplyWithStringBuffer(ctx, filename.data(), filename.size());
+      RedisModule_ReplyWithStringBuffer(ctx, status.data(), status.size());
     }
 
-    return REDISMODULE_ERR;
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
+
+  return REDISMODULE_ERR;
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

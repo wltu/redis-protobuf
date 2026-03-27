@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "module_api.h"
+
 #include <cassert>
 
 namespace sw {
@@ -25,65 +26,68 @@ namespace pb {
 
 namespace api {
 
-RedisKey open_key(RedisModuleCtx *ctx, RedisModuleString *name, KeyMode key_mode) {
-    if (name == nullptr) {
-        throw Error("cannot open key with a null name");
-    }
+RedisKey open_key(RedisModuleCtx* ctx, RedisModuleString* name,
+                  KeyMode key_mode) {
+  if (name == nullptr) {
+    throw Error("cannot open key with a null name");
+  }
 
-    int mode = 0;
-    switch (key_mode) {
+  int mode = 0;
+  switch (key_mode) {
     case KeyMode::READONLY:
-        mode = REDISMODULE_READ;
-        break;
+      mode = REDISMODULE_READ;
+      break;
 
     case KeyMode::WRITEONLY:
-        mode = REDISMODULE_WRITE;
-        break;
+      mode = REDISMODULE_WRITE;
+      break;
 
     case KeyMode::READWRITE:
-        mode = REDISMODULE_READ | REDISMODULE_WRITE;
-        break;
+      mode = REDISMODULE_READ | REDISMODULE_WRITE;
+      break;
 
     default:
-        assert(false);
-    }
+      assert(false);
+  }
 
-    return RedisKey(static_cast<RedisModuleKey *>(RedisModule_OpenKey(ctx, name, mode)));
+  return RedisKey(
+      static_cast<RedisModuleKey*>(RedisModule_OpenKey(ctx, name, mode)));
 }
 
-bool key_exists(RedisModuleKey *key, RedisModuleType *key_type) {
-    // key can be nullptr.
-    auto type = RedisModule_KeyType(key);
-    if (type == REDISMODULE_KEYTYPE_EMPTY) {
-        return false;
-    }
+bool key_exists(RedisModuleKey* key, RedisModuleType* key_type) {
+  // key can be nullptr.
+  auto type = RedisModule_KeyType(key);
+  if (type == REDISMODULE_KEYTYPE_EMPTY) {
+    return false;
+  }
 
-    if (RedisModule_ModuleTypeGetType(key) == key_type) {
-        return true;
-    }
+  if (RedisModule_ModuleTypeGetType(key) == key_type) {
+    return true;
+  }
 
-    throw WrongTypeError(REDISMODULE_ERRORMSG_WRONGTYPE);
+  throw WrongTypeError(REDISMODULE_ERRORMSG_WRONGTYPE);
 }
 
-int reply_with_error(RedisModuleCtx *ctx, const Error &err) {
-    auto msg = std::string("ERR ") + err.what();
+int reply_with_error(RedisModuleCtx* ctx, const Error& err) {
+  auto msg = std::string("ERR ") + err.what();
 
-    return RedisModule_ReplyWithError(ctx, msg.data());
+  return RedisModule_ReplyWithError(ctx, msg.data());
 }
 
-google::protobuf::Message* get_msg_by_key(RedisModuleKey *key) {
-    auto *msg = static_cast<google::protobuf::Message *>(RedisModule_ModuleTypeGetValue(key));
-    if (msg == nullptr) {
-        throw Error("failed to get message by key");
-    }
+google::protobuf::Message* get_msg_by_key(RedisModuleKey* key) {
+  auto* msg = static_cast<google::protobuf::Message*>(
+      RedisModule_ModuleTypeGetValue(key));
+  if (msg == nullptr) {
+    throw Error("failed to get message by key");
+  }
 
-    return msg;
+  return msg;
 }
 
-}
+}  // namespace api
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

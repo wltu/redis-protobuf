@@ -17,9 +17,9 @@
 #ifndef SEWENEW_REDISPROTOBUF_LEN_COMMANDS_H
 #define SEWENEW_REDISPROTOBUF_LEN_COMMANDS_H
 
+#include "field_ref.h"
 #include "module_api.h"
 #include "utils.h"
-#include "field_ref.h"
 
 namespace sw {
 
@@ -28,7 +28,7 @@ namespace redis {
 namespace pb {
 
 // command: PB.LEN key type [path]
-// return:  Integer reply: If the specified path is a string, return the 
+// return:  Integer reply: If the specified path is a string, return the
 //          length of the string in bytes; if the field is an array or a map,
 //          return the size of the array or map. If the field is a message,
 //          return the size of the message in bytes, i.e. Message::ByteSizeLong.
@@ -36,26 +36,26 @@ namespace pb {
 // error:   If the path doesn't exist, or the corresponding field is not a
 //          message or a string or an array or a map, return an error reply.
 class LenCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        RedisModuleString *key_name;
-        Path path;
-    };
+ private:
+  struct Args {
+    RedisModuleString* key_name;
+    Path path;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    long long _len(gp::Message &msg, const Path &path) const;
+  long long _len(gp::Message& msg, const Path& path) const;
 
-    long long _len(const ConstFieldRef &field) const;
+  long long _len(const ConstFieldRef& field) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_LEN_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_LEN_COMMANDS_H

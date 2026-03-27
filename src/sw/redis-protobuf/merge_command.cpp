@@ -15,11 +15,12 @@
  *************************************************************************/
 
 #include "merge_command.h"
+
 #include "errors.h"
-#include "redis_protobuf.h"
-#include "utils.h"
 #include "field_ref.h"
+#include "redis_protobuf.h"
 #include "set_command.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -27,93 +28,94 @@ namespace redis {
 
 namespace pb {
 
-int MergeCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int MergeCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                      int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
+    auto args = _parse_args(argv, argc);
 
-        auto key = api::open_key(ctx, args.key_name, api::KeyMode::WRITEONLY);
-        if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
-            SetCommand set_cmd;
-            set_cmd._run(ctx, argv, argc);
+    auto key = api::open_key(ctx, args.key_name, api::KeyMode::WRITEONLY);
+    if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
+      SetCommand set_cmd;
+      set_cmd._run(ctx, argv, argc);
 
-            return RedisModule_ReplyWithLongLong(ctx, 0);
-        }
-
-        auto *msg = api::get_msg_by_key(key.get());
-        assert(msg != nullptr);
-
-        _merge(args, *msg);
-
-        RedisModule_ReplyWithLongLong(ctx, 1);
-
-        RedisModule_ReplicateVerbatim(ctx);
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
+      return RedisModule_ReplyWithLongLong(ctx, 0);
     }
 
-    return REDISMODULE_ERR;
+    auto* msg = api::get_msg_by_key(key.get());
+    assert(msg != nullptr);
+
+    _merge(args, *msg);
+
+    RedisModule_ReplyWithLongLong(ctx, 1);
+
+    RedisModule_ReplicateVerbatim(ctx);
+
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
+
+  return REDISMODULE_ERR;
 }
 
-MergeCommand::Args MergeCommand::_parse_args(RedisModuleString **argv, int argc) const {
-    assert(argv != nullptr);
+MergeCommand::Args MergeCommand::_parse_args(RedisModuleString** argv,
+                                             int argc) const {
+  assert(argv != nullptr);
 
-    if (argc != 4 && argc != 5) {
-        throw WrongArityError();
-    }
+  if (argc != 4 && argc != 5) {
+    throw WrongArityError();
+  }
 
-    Path path;
-    StringView val;
-    if (argc == 4) {
-        path = Path(argv[2]);
-        val = StringView(argv[3]);
-    } else {
-        path = Path(argv[2], argv[3]);
-        val = StringView(argv[4]);
-    }
+  Path path;
+  StringView val;
+  if (argc == 4) {
+    path = Path(argv[2]);
+    val = StringView(argv[3]);
+  } else {
+    path = Path(argv[2], argv[3]);
+    val = StringView(argv[4]);
+  }
 
-    return {argv[1], std::move(path), std::move(val)};
+  return {argv[1], std::move(path), std::move(val)};
 }
 
-void MergeCommand::_merge(const Args &args, gp::Message &msg) const {
-    const auto &path = args.path;
-    if (path.empty()) {
-        _merge_msg(path.type(), args.val, msg);
-    } else {
-        _merge_sub_msg(path, args.val, msg);
-    }
+void MergeCommand::_merge(const Args& args, gp::Message& msg) const {
+  const auto& path = args.path;
+  if (path.empty()) {
+    _merge_msg(path.type(), args.val, msg);
+  } else {
+    _merge_sub_msg(path, args.val, msg);
+  }
 }
 
-void MergeCommand::_merge_msg(const std::string &type,
-        const StringView &val,
-        gp::Message &msg) const {
-    if (type != msg.GetTypeName()) {
-        throw Error("type mismatch");
-    }
+void MergeCommand::_merge_msg(const std::string& type, const StringView& val,
+                              gp::Message& msg) const {
+  if (type != msg.GetTypeName()) {
+    throw Error("type mismatch");
+  }
 
-    auto other = RedisProtobuf::instance().proto_factory()->create(type, val);
-    assert(other);
+  auto other = RedisProtobuf::instance().proto_factory()->create(type, val);
+  assert(other);
 
-    msg.MergeFrom(*other);
+  msg.MergeFrom(*other);
 }
 
-void MergeCommand::_merge_sub_msg(const Path &path,
-        const StringView &val,
-        gp::Message &msg) const {
-    MutableFieldRef field(&msg, path);
-    auto sub_msg = RedisProtobuf::instance().proto_factory()->create(field.msg_type(), val);
-    assert(sub_msg);
+void MergeCommand::_merge_sub_msg(const Path& path, const StringView& val,
+                                  gp::Message& msg) const {
+  MutableFieldRef field(&msg, path);
+  auto sub_msg =
+      RedisProtobuf::instance().proto_factory()->create(field.msg_type(), val);
+  assert(sub_msg);
 
-    field.merge(*sub_msg);
+  field.merge(*sub_msg);
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

@@ -17,12 +17,13 @@
 #ifndef SEWENEW_REDISPROTOBUF_IMPORT_COMMAND_H
 #define SEWENEW_REDISPROTOBUF_IMPORT_COMMAND_H
 
-#include "module_api.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "utils.h"
+
 #include "field_ref.h"
+#include "module_api.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -34,22 +35,22 @@ namespace pb {
 // return:  OK status reply.
 // error:   If failing to import, return an error reply.
 class ImportCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        std::string filename;
-        std::string content;
-    };
+ private:
+  struct Args {
+    std::string filename;
+    std::string content;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_IMPORT_COMMAND_H
+#endif  // end SEWENEW_REDISPROTOBUF_IMPORT_COMMAND_H

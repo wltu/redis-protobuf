@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class DelTest : public ProtoTest {
-public:
-    explicit DelTest(sw::redis::Redis &r) : ProtoTest("PB.DEL", r) {}
+ public:
+  explicit DelTest(sw::redis::Redis& r) : ProtoTest("PB.DEL", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_DEL_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_DEL_TEST_H

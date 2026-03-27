@@ -15,10 +15,12 @@
  *************************************************************************/
 
 #include "import_test.h"
-#include <unordered_map>
-#include <string>
+
 #include <chrono>
+#include <string>
 #include <thread>
+#include <unordered_map>
+
 #include "utils.h"
 
 namespace sw {
@@ -29,13 +31,13 @@ namespace pb {
 
 namespace test {
 
-void ImportTest::_run(sw::redis::Redis &r) {
-    auto key = test_key("import");
+void ImportTest::_run(sw::redis::Redis& r) {
+  auto key = test_key("import");
 
-    KeyDeleter deleter(r, key);
+  KeyDeleter deleter(r, key);
 
-    std::string name{"test_import.proto"};
-    auto proto = R"(
+  std::string name{"test_import.proto"};
+  auto proto = R"(
 syntax = "proto3";
 package sw.redis.pb;
 message Msg {
@@ -43,24 +45,26 @@ message Msg {
     string s = 2;
 }
     )";
-    r.command<void>("PB.IMPORT", name, proto);
+  r.command<void>("PB.IMPORT", name, proto);
 
-    // Ensure proto has been loaded
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+  // Ensure proto has been loaded
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    auto res = r.command<std::unordered_map<std::string, std::string>>("PB.LASTIMPORT");
-    REDIS_ASSERT(res.size() == 1 && res[name] == "OK",
-            "failed to test pb.import command");
+  auto res =
+      r.command<std::unordered_map<std::string, std::string>>("PB.LASTIMPORT");
+  REDIS_ASSERT(res.size() == 1 && res[name] == "OK",
+               "failed to test pb.import command");
 
-    REDIS_ASSERT(r.command<long long>("PB.SET", key, "sw.redis.pb.Msg", "/i", 123) &&
-            r.command<long long>("PB.GET", key, "sw.redis.pb.Msg", "/i") == 123,
-        "failed to test pb.import command");
+  REDIS_ASSERT(
+      r.command<long long>("PB.SET", key, "sw.redis.pb.Msg", "/i", 123) &&
+          r.command<long long>("PB.GET", key, "sw.redis.pb.Msg", "/i") == 123,
+      "failed to test pb.import command");
 }
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

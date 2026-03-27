@@ -28,19 +28,19 @@ namespace pb {
 namespace test {
 
 class ImportTest : public ProtoTest {
-public:
-    explicit ImportTest(sw::redis::Redis &r) : ProtoTest("PB.IMPORT", r) {}
+ public:
+  explicit ImportTest(sw::redis::Redis& r) : ProtoTest("PB.IMPORT", r) {}
 
-private:
-    virtual void _run(sw::redis::Redis &r) override;
+ private:
+  virtual void _run(sw::redis::Redis& r) override;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_IMPORT_TEST_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_IMPORT_TEST_H

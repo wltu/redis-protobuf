@@ -18,6 +18,7 @@
 #define SEWENEW_REDISPROTOBUF_SCHEMA_COMMANDS_H
 
 #include <google/protobuf/descriptor.h>
+
 #include "module_api.h"
 #include "utils.h"
 
@@ -31,23 +32,23 @@ namespace pb {
 // return:  Bulk string reply: return the schema of the specified type. If
 //          the type doesn't exist, return a nil reply.
 class SchemaCommand {
-public:
-    int run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const;
+ public:
+  int run(RedisModuleCtx* ctx, RedisModuleString** argv, int argc) const;
 
-private:
-    struct Args {
-        std::string type;
-    };
+ private:
+  struct Args {
+    std::string type;
+  };
 
-    Args _parse_args(RedisModuleString **argv, int argc) const;
+  Args _parse_args(RedisModuleString** argv, int argc) const;
 
-    std::string _format(const std::string &schema) const;
+  std::string _format(const std::string& schema) const;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_SCHEMA_COMMANDS_H
+#endif  // end SEWENEW_REDISPROTOBUF_SCHEMA_COMMANDS_H

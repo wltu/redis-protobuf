@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "proto_test.h"
+
 #include <iostream>
 
 namespace sw {
@@ -26,17 +27,17 @@ namespace pb {
 namespace test {
 
 void ProtoTest::run() {
-    std::cout << "Test " << _name << ": ";
+  std::cout << "Test " << _name << ": ";
 
-    _run(_redis);
+  _run(_redis);
 
-    std::cout << "pass" << std::endl;
+  std::cout << "pass" << std::endl;
 }
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

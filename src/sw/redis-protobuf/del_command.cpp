@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "del_command.h"
+
 #include "errors.h"
 #include "redis_protobuf.h"
 
@@ -24,79 +25,81 @@ namespace redis {
 
 namespace pb {
 
-int DelCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int DelCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                    int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
+    auto args = _parse_args(argv, argc);
 
-        auto key = api::open_key(ctx, args.key_name, api::KeyMode::WRITEONLY);
-        assert(key);
+    auto key = api::open_key(ctx, args.key_name, api::KeyMode::WRITEONLY);
+    assert(key);
 
-        if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
-            RedisModule_ReplyWithLongLong(ctx, 0);
-        } else {
-            auto *msg = api::get_msg_by_key(key.get());
-            assert(msg != nullptr);
-
-            const auto &path = args.path;
-            if (msg->GetTypeName() != path.type()) {
-                throw Error("type mismatch");
-            }
-
-            if (path.empty()) {
-                // Delete key.
-                RedisModule_DeleteKey(key.get());
-            } else {
-                // Delete an item from array or map.
-                _del(*msg, path);
-            }
-
-            RedisModule_ReplyWithLongLong(ctx, 1);
-        }
-
-        RedisModule_ReplicateVerbatim(ctx);
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
-    }
-
-    return REDISMODULE_ERR;
-}
-
-DelCommand::Args DelCommand::_parse_args(RedisModuleString **argv, int argc) const {
-    assert(argv != nullptr);
-
-    if (argc != 3 && argc != 4) {
-        throw WrongArityError();
-    }
-
-    Path path;
-    if (argc == 3) {
-        path = Path(argv[2]);
+    if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
+      RedisModule_ReplyWithLongLong(ctx, 0);
     } else {
-        path = Path(argv[2], argv[3]);
+      auto* msg = api::get_msg_by_key(key.get());
+      assert(msg != nullptr);
+
+      const auto& path = args.path;
+      if (msg->GetTypeName() != path.type()) {
+        throw Error("type mismatch");
+      }
+
+      if (path.empty()) {
+        // Delete key.
+        RedisModule_DeleteKey(key.get());
+      } else {
+        // Delete an item from array or map.
+        _del(*msg, path);
+      }
+
+      RedisModule_ReplyWithLongLong(ctx, 1);
     }
 
-    return {argv[1], std::move(path)};
+    RedisModule_ReplicateVerbatim(ctx);
+
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
+
+  return REDISMODULE_ERR;
 }
 
-void DelCommand::_del(gp::Message &msg, const Path &path) const {
-    MutableFieldRef field(&msg, path);
+DelCommand::Args DelCommand::_parse_args(RedisModuleString** argv,
+                                         int argc) const {
+  assert(argv != nullptr);
 
-    if (!field.is_array_element()) {
-        // TODO: support map element
-        throw Error("not an array or map");
-    }
+  if (argc != 3 && argc != 4) {
+    throw WrongArityError();
+  }
 
-    field.del();
+  Path path;
+  if (argc == 3) {
+    path = Path(argv[2]);
+  } else {
+    path = Path(argv[2], argv[3]);
+  }
+
+  return {argv[1], std::move(path)};
 }
 
+void DelCommand::_del(gp::Message& msg, const Path& path) const {
+  MutableFieldRef field(&msg, path);
+
+  if (!field.is_array_element()) {
+    // TODO: support map element
+    throw Error("not an array or map");
+  }
+
+  field.del();
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
+
+}  // namespace sw

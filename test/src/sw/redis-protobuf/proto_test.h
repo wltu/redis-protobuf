@@ -28,32 +28,30 @@ namespace pb {
 namespace test {
 
 class ProtoTest {
-public:
-    ProtoTest(const std::string &name, sw::redis::Redis &r) :
-        _name(name), _redis(r) {}
+ public:
+  ProtoTest(const std::string& name, sw::redis::Redis& r)
+      : _name(name), _redis(r) {}
 
-    virtual ~ProtoTest() = default;
+  virtual ~ProtoTest() = default;
 
-    void run();
+  void run();
 
-    const std::string& name() const {
-        return _name;
-    }
+  const std::string& name() const { return _name; }
 
-private:
-    virtual void _run(sw::redis::Redis &r) = 0;
+ private:
+  virtual void _run(sw::redis::Redis& r) = 0;
 
-    std::string _name;
+  std::string _name;
 
-    sw::redis::Redis &_redis;
+  sw::redis::Redis& _redis;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // endif SEWENEW_REDISPROTOBUF_TEST_PROTO_TEST_H
+#endif  // endif SEWENEW_REDISPROTOBUF_TEST_PROTO_TEST_H

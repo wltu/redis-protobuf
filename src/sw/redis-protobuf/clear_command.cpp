@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "clear_command.h"
+
 #include "errors.h"
 #include "redis_protobuf.h"
 
@@ -24,69 +25,71 @@ namespace redis {
 
 namespace pb {
 
-int ClearCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int ClearCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                      int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
+    auto args = _parse_args(argv, argc);
 
-        auto key = api::open_key(ctx, args.key_name, api::KeyMode::READONLY);
-        if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
-            RedisModule_ReplyWithLongLong(ctx, 0);
-        } else {
-            auto *msg = api::get_msg_by_key(key.get());
-            assert(msg != nullptr);
-
-            if (msg->GetTypeName() != args.path.type()) {
-                throw Error("type mismatch");
-            }
-
-            _clear(*msg, args.path);
-
-            RedisModule_ReplyWithLongLong(ctx, 1);
-        }
-
-        RedisModule_ReplicateVerbatim(ctx);
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
-    }
-
-    return REDISMODULE_ERR;
-}
-
-ClearCommand::Args ClearCommand::_parse_args(RedisModuleString **argv, int argc) const {
-    assert(argv != nullptr);
-
-    if (argc != 3 && argc != 4) {
-        throw WrongArityError();
-    }
-
-    Path path;
-    if (argc == 3) {
-        path = Path(argv[2]);
+    auto key = api::open_key(ctx, args.key_name, api::KeyMode::READONLY);
+    if (!api::key_exists(key.get(), RedisProtobuf::instance().type())) {
+      RedisModule_ReplyWithLongLong(ctx, 0);
     } else {
-        path = Path(argv[2], argv[3]);
+      auto* msg = api::get_msg_by_key(key.get());
+      assert(msg != nullptr);
+
+      if (msg->GetTypeName() != args.path.type()) {
+        throw Error("type mismatch");
+      }
+
+      _clear(*msg, args.path);
+
+      RedisModule_ReplyWithLongLong(ctx, 1);
     }
-    return {argv[1], std::move(path)};
+
+    RedisModule_ReplicateVerbatim(ctx);
+
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
+
+  return REDISMODULE_ERR;
 }
 
-void ClearCommand::_clear(gp::Message &msg, const Path &path) const {
-    if (path.empty()) {
-        // Clear the message.
-        msg.Clear();
-    } else {
-        // Clear a field.
-        MutableFieldRef field(&msg, path);
-        field.clear();
-    }
+ClearCommand::Args ClearCommand::_parse_args(RedisModuleString** argv,
+                                             int argc) const {
+  assert(argv != nullptr);
+
+  if (argc != 3 && argc != 4) {
+    throw WrongArityError();
+  }
+
+  Path path;
+  if (argc == 3) {
+    path = Path(argv[2]);
+  } else {
+    path = Path(argv[2], argv[3]);
+  }
+  return {argv[1], std::move(path)};
 }
 
+void ClearCommand::_clear(gp::Message& msg, const Path& path) const {
+  if (path.empty()) {
+    // Clear the message.
+    msg.Clear();
+  } else {
+    // Clear a field.
+    MutableFieldRef field(&msg, path);
+    field.clear();
+  }
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
+
+}  // namespace sw

@@ -27,68 +27,67 @@ namespace redis {
 namespace pb {
 
 class Error : public std::exception {
-public:
-    explicit Error(const std::string &msg) : _msg(msg) {}
+ public:
+  explicit Error(const std::string& msg) : _msg(msg) {}
 
-    Error(const Error &) = default;
-    Error& operator=(const Error &) = default;
+  Error(const Error&) = default;
+  Error& operator=(const Error&) = default;
 
-    Error(Error &&) = default;
-    Error& operator=(Error &&) = default;
+  Error(Error&&) = default;
+  Error& operator=(Error&&) = default;
 
-    virtual ~Error() = default;
+  virtual ~Error() = default;
 
-    virtual const char* what() const noexcept {
-        return _msg.data();
-    }
+  virtual const char* what() const noexcept { return _msg.data(); }
 
-private:
-    std::string _msg;
+ private:
+  std::string _msg;
 };
 
 class WrongTypeError : public Error {
-public:
-    explicit WrongTypeError(const std::string &msg) : Error(msg) {}
+ public:
+  explicit WrongTypeError(const std::string& msg) : Error(msg) {}
 
-    WrongTypeError(const WrongTypeError &) = default;
-    WrongTypeError& operator=(const WrongTypeError &) = default;
+  WrongTypeError(const WrongTypeError&) = default;
+  WrongTypeError& operator=(const WrongTypeError&) = default;
 
-    WrongTypeError(WrongTypeError &&) = default;
-    WrongTypeError& operator=(WrongTypeError &&) = default;
+  WrongTypeError(WrongTypeError&&) = default;
+  WrongTypeError& operator=(WrongTypeError&&) = default;
 
-    virtual ~WrongTypeError() = default;
+  virtual ~WrongTypeError() = default;
 };
 
 class WrongArityError : public Error {
-public:
-    WrongArityError() : Error("WrongArity") {}
+ public:
+  WrongArityError() : Error("WrongArity") {}
 
-    WrongArityError(const WrongArityError &) = default;
-    WrongArityError& operator=(const WrongArityError &) = default;
+  WrongArityError(const WrongArityError&) = default;
+  WrongArityError& operator=(const WrongArityError&) = default;
 
-    WrongArityError(WrongArityError &&) = default;
-    WrongArityError& operator=(WrongArityError &&) = default;
+  WrongArityError(WrongArityError&&) = default;
+  WrongArityError& operator=(WrongArityError&&) = default;
 
-    virtual ~WrongArityError() = default;
+  virtual ~WrongArityError() = default;
 };
 
 class MapKeyNotFoundError : public Error {
-public:
-    explicit MapKeyNotFoundError(const std::string &key) : Error("key not found: " + key) {}
+ public:
+  explicit MapKeyNotFoundError(const std::string& key)
+      : Error("key not found: " + key) {}
 
-    MapKeyNotFoundError(const MapKeyNotFoundError &) = default;
-    MapKeyNotFoundError& operator=(const MapKeyNotFoundError &) = default;
+  MapKeyNotFoundError(const MapKeyNotFoundError&) = default;
+  MapKeyNotFoundError& operator=(const MapKeyNotFoundError&) = default;
 
-    MapKeyNotFoundError(MapKeyNotFoundError &&) = default;
-    MapKeyNotFoundError& operator=(MapKeyNotFoundError &&) = default;
+  MapKeyNotFoundError(MapKeyNotFoundError&&) = default;
+  MapKeyNotFoundError& operator=(MapKeyNotFoundError&&) = default;
 
-    virtual ~MapKeyNotFoundError() = default;
+  virtual ~MapKeyNotFoundError() = default;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_ERRORS_H
+#endif  // end SEWENEW_REDISPROTOBUF_ERRORS_H

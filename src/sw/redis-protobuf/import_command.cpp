@@ -15,10 +15,12 @@
  *************************************************************************/
 
 #include "import_command.h"
+
 #include <cassert>
-#include "utils.h"
+
 #include "errors.h"
 #include "redis_protobuf.h"
+#include "utils.h"
 
 namespace sw {
 
@@ -26,45 +28,47 @@ namespace redis {
 
 namespace pb {
 
-int ImportCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int ImportCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                       int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
+    auto args = _parse_args(argv, argc);
 
-        auto &m= RedisProtobuf::instance();
-        m.proto_factory()->load(args.filename, args.content);
+    auto& m = RedisProtobuf::instance();
+    m.proto_factory()->load(args.filename, args.content);
 
-        RedisModule_ReplicateVerbatim(ctx);
+    RedisModule_ReplicateVerbatim(ctx);
 
-        RedisModule_ReplyWithSimpleString(ctx, "OK");
+    RedisModule_ReplyWithSimpleString(ctx, "OK");
 
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
-    }
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
 
-    return REDISMODULE_ERR;
+  return REDISMODULE_ERR;
 }
 
-auto ImportCommand::_parse_args(RedisModuleString **argv, int argc) const -> Args {
-    assert(argv != nullptr);
+auto ImportCommand::_parse_args(RedisModuleString** argv, int argc) const
+    -> Args {
+  assert(argv != nullptr);
 
-    if (argc != 3) {
-        throw WrongArityError();
-    }
+  if (argc != 3) {
+    throw WrongArityError();
+  }
 
-    Args args;
-    args.filename = util::sv_to_string(argv[1]);
-    args.content = util::sv_to_string(argv[2]);
+  Args args;
+  args.filename = util::sv_to_string(argv[1]);
+  args.content = util::sv_to_string(argv[2]);
 
-    return args;
+  return args;
 }
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

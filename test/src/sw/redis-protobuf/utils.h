@@ -17,12 +17,13 @@
 #ifndef SEWENEW_REDISPROTOBUF_TEST_UTILS_H
 #define SEWENEW_REDISPROTOBUF_TEST_UTILS_H
 
-#include <string>
-#include <vector>
 #include <sw/redis++/redis++.h>
 
+#include <string>
+#include <vector>
+
 #define REDIS_ASSERT(condition, msg) \
-    sw::redis::pb::test::redis_assert((condition), (msg), __FILE__, __LINE__)
+  sw::redis::pb::test::redis_assert((condition), (msg), __FILE__, __LINE__)
 
 namespace sw {
 
@@ -32,64 +33,62 @@ namespace pb {
 
 namespace test {
 
-inline void redis_assert(bool condition,
-                            const std::string &msg,
-                            const std::string &file,
-                            int line) {
-    if (!condition) {
-        auto err_msg = "ASSERT: " + msg + ". " + file + ":" + std::to_string(line);
-        throw Error(err_msg);
-    }
+inline void redis_assert(bool condition, const std::string& msg,
+                         const std::string& file, int line) {
+  if (!condition) {
+    auto err_msg = "ASSERT: " + msg + ". " + file + ":" + std::to_string(line);
+    throw Error(err_msg);
+  }
 }
 
-inline std::string key_prefix(const std::string &key = "") {
-    static std::string KEY_PREFIX = "sw::redis::test";
-    if (!key.empty()) {
-        KEY_PREFIX = key;
-    }
+inline std::string key_prefix(const std::string& key = "") {
+  static std::string KEY_PREFIX = "sw::redis::test";
+  if (!key.empty()) {
+    KEY_PREFIX = key;
+  }
 
-    return KEY_PREFIX;
+  return KEY_PREFIX;
 }
 
-inline std::string test_key(const std::string &k) {
-    // Key prefix with hash tag,
-    // so that we can call multiple-key commands on RedisCluster.
-    return "{" + key_prefix() + "}::" + k;
+inline std::string test_key(const std::string& k) {
+  // Key prefix with hash tag,
+  // so that we can call multiple-key commands on RedisCluster.
+  return "{" + key_prefix() + "}::" + k;
 }
 
 class KeyDeleter {
-public:
-    template <typename Input>
-    KeyDeleter(sw::redis::Redis &redis, Input first, Input last) : _redis(redis), _keys(first, last) {
-        _delete();
+ public:
+  template <typename Input>
+  KeyDeleter(sw::redis::Redis& redis, Input first, Input last)
+      : _redis(redis), _keys(first, last) {
+    _delete();
+  }
+
+  KeyDeleter(sw::redis::Redis& redis, std::initializer_list<std::string> il)
+      : KeyDeleter(redis, il.begin(), il.end()) {}
+
+  KeyDeleter(sw::redis::Redis& redis, const std::string& key)
+      : KeyDeleter(redis, {key}) {}
+
+  ~KeyDeleter() { _delete(); }
+
+ private:
+  void _delete() {
+    if (!_keys.empty()) {
+      _redis.del(_keys.begin(), _keys.end());
     }
+  }
 
-    KeyDeleter(sw::redis::Redis &redis, std::initializer_list<std::string> il) :
-                KeyDeleter(redis, il.begin(), il.end()) {}
-
-    KeyDeleter(sw::redis::Redis &redis, const std::string &key) : KeyDeleter(redis, {key}) {}
-
-    ~KeyDeleter() {
-        _delete();
-    }
-
-private:
-    void _delete() {
-        if (!_keys.empty()) {
-            _redis.del(_keys.begin(), _keys.end());
-        }
-    }
-
-    sw::redis::Redis &_redis;
-    std::vector<std::string> _keys;
+  sw::redis::Redis& _redis;
+  std::vector<std::string> _keys;
 };
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_TEST_UTILS_H
+#endif  // end SEWENEW_REDISPROTOBUF_TEST_UTILS_H

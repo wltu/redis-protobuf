@@ -15,9 +15,10 @@
  *************************************************************************/
 
 #include "schema_command.h"
+
 #include "errors.h"
-#include "redis_protobuf.h"
 #include "field_ref.h"
+#include "redis_protobuf.h"
 
 namespace sw {
 
@@ -25,68 +26,70 @@ namespace redis {
 
 namespace pb {
 
-int SchemaCommand::run(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) const {
-    try {
-        assert(ctx != nullptr);
+int SchemaCommand::run(RedisModuleCtx* ctx, RedisModuleString** argv,
+                       int argc) const {
+  try {
+    assert(ctx != nullptr);
 
-        auto args = _parse_args(argv, argc);
-        const auto &type = args.type;
+    auto args = _parse_args(argv, argc);
+    const auto& type = args.type;
 
-        auto *desc = RedisProtobuf::instance().proto_factory()->descriptor(type);
-        if (desc == nullptr) {
-            RedisModule_ReplyWithNull(ctx);
-        } else {
-            //auto schema = _format(desc->DebugString());
-            auto schema = desc->DebugString();
+    auto* desc = RedisProtobuf::instance().proto_factory()->descriptor(type);
+    if (desc == nullptr) {
+      RedisModule_ReplyWithNull(ctx);
+    } else {
+      // auto schema = _format(desc->DebugString());
+      auto schema = desc->DebugString();
 
-            RedisModule_ReplyWithStringBuffer(ctx, schema.data(), schema.size());
-        }
-
-        return REDISMODULE_OK;
-    } catch (const WrongArityError &err) {
-        return RedisModule_WrongArity(ctx);
-    } catch (const Error &err) {
-        return api::reply_with_error(ctx, err);
+      RedisModule_ReplyWithStringBuffer(ctx, schema.data(), schema.size());
     }
 
-    return REDISMODULE_ERR;
+    return REDISMODULE_OK;
+  } catch (const WrongArityError& err) {
+    return RedisModule_WrongArity(ctx);
+  } catch (const Error& err) {
+    return api::reply_with_error(ctx, err);
+  }
+
+  return REDISMODULE_ERR;
 }
 
-SchemaCommand::Args SchemaCommand::_parse_args(RedisModuleString **argv, int argc) const {
-    assert(argv != nullptr);
+SchemaCommand::Args SchemaCommand::_parse_args(RedisModuleString** argv,
+                                               int argc) const {
+  assert(argv != nullptr);
 
-    if (argc != 2) {
-        throw WrongArityError();
+  if (argc != 2) {
+    throw WrongArityError();
+  }
+
+  return {Path(argv[1]).type()};
+}
+
+std::string SchemaCommand::_format(const std::string& schema) const {
+  std::string formated_schema;
+  formated_schema.reserve(schema.size() * 2);
+
+  for (auto ch : schema) {
+    if (ch != '.') {
+      formated_schema.push_back(ch);
+    } else {
+      if (formated_schema.empty()) {
+        // This should not happen.
+        throw Error("invalid schema");
+      }
+
+      if (formated_schema.back() != ' ') {
+        // '.' => '::'
+        formated_schema.append("::");
+      }  // else discard leading '.'
     }
+  }
 
-    return {Path(argv[1]).type()};
+  return formated_schema;
 }
 
-std::string SchemaCommand::_format(const std::string &schema) const {
-    std::string formated_schema;
-    formated_schema.reserve(schema.size() * 2);
+}  // namespace pb
 
-    for (auto ch : schema) {
-        if (ch != '.') {
-            formated_schema.push_back(ch);
-        } else {
-            if (formated_schema.empty()) {
-                // This should not happen.
-                throw Error("invalid schema");
-            }
-            
-            if (formated_schema.back() != ' ') {
-                // '.' => '::'
-                formated_schema.append("::");
-            } // else discard leading '.'
-        }
-    }
+}  // namespace redis
 
-    return formated_schema;
-}
-
-}
-
-}
-
-}
+}  // namespace sw

@@ -18,8 +18,8 @@
 #define SEWENEW_REDISPROTOBUF_REDIS_PROTOBUF_H
 
 #include "module_api.h"
-#include "proto_factory.h"
 #include "options.h"
+#include "proto_factory.h"
 
 namespace sw {
 
@@ -28,69 +28,56 @@ namespace redis {
 namespace pb {
 
 class RedisProtobuf {
-public:
-    static RedisProtobuf& instance();
+ public:
+  static RedisProtobuf& instance();
 
-    void load(RedisModuleCtx *ctx, RedisModuleString **argv, int argc);
+  void load(RedisModuleCtx* ctx, RedisModuleString** argv, int argc);
 
-    int module_version() const {
-        return _MODULE_VERSION;
-    }
+  int module_version() const { return _MODULE_VERSION; }
 
-    int encoding_version() const {
-        return _ENCODING_VERSION;
-    }
+  int encoding_version() const { return _ENCODING_VERSION; }
 
-    const std::string& module_name() const {
-        return _MODULE_NAME;
-    }
+  const std::string& module_name() const { return _MODULE_NAME; }
 
-    const std::string& type_name() const {
-        return _TYPE_NAME;
-    }
+  const std::string& type_name() const { return _TYPE_NAME; }
 
-    RedisModuleType* type() {
-        return _module_type;
-    }
+  RedisModuleType* type() { return _module_type; }
 
-    const Options& options() const {
-        return _options;
-    }
+  const Options& options() const { return _options; }
 
-    ProtoFactory* proto_factory() {
-        return _proto_factory.get();
-    }
+  ProtoFactory* proto_factory() { return _proto_factory.get(); }
 
-private:
-    RedisProtobuf() = default;
+ private:
+  RedisProtobuf() = default;
 
-    static void* _rdb_load(RedisModuleIO *rdb, int encver);
+  static void* _rdb_load(RedisModuleIO* rdb, int encver);
 
-    static void _rdb_save(RedisModuleIO *rdb, void *value);
+  static void _rdb_save(RedisModuleIO* rdb, void* value);
 
-    static void _aof_rewrite(RedisModuleIO *aof, RedisModuleString *key, void *value);
+  static void _aof_rewrite(RedisModuleIO* aof, RedisModuleString* key,
+                           void* value);
 
-    static void _free_msg(void *value);
+  static void _free_msg(void* value);
 
-    const int _MODULE_VERSION = 1;
+  const int _MODULE_VERSION = 1;
 
-    const int _ENCODING_VERSION = 0;
+  const int _ENCODING_VERSION = 0;
 
-    const std::string _MODULE_NAME = "PB";
+  const std::string _MODULE_NAME = "PB";
 
-    const std::string _TYPE_NAME = "PROTOC-SW";
+  const std::string _TYPE_NAME = "PROTOC-SW";
 
-    RedisModuleType *_module_type = nullptr;
+  RedisModuleType* _module_type = nullptr;
 
-    std::unique_ptr<ProtoFactory> _proto_factory;
+  std::unique_ptr<ProtoFactory> _proto_factory;
 
-    Options _options;
+  Options _options;
 };
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_REDIS_PROTOBUF_H
+#endif  // end SEWENEW_REDISPROTOBUF_REDIS_PROTOBUF_H

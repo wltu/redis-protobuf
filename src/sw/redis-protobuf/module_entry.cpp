@@ -15,24 +15,27 @@
  *************************************************************************/
 
 #include "module_entry.h"
+
 #include <cassert>
-#include "redis_protobuf.h"
+
 #include "errors.h"
 #include "module_api.h"
+#include "redis_protobuf.h"
 
-int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    assert(ctx != nullptr);
+int RedisModule_OnLoad(RedisModuleCtx* ctx, RedisModuleString** argv,
+                       int argc) {
+  assert(ctx != nullptr);
 
-    using namespace sw::redis::pb;
+  using namespace sw::redis::pb;
 
-    try {
-        auto &m = RedisProtobuf::instance();
+  try {
+    auto& m = RedisProtobuf::instance();
 
-        m.load(ctx, argv, argc);
-    } catch (const Error &e) {
-        api::warning(ctx, "%s", e.what());
-        return REDISMODULE_ERR;
-    }
+    m.load(ctx, argv, argc);
+  } catch (const Error& e) {
+    api::warning(ctx, "%s", e.what());
+    return REDISMODULE_ERR;
+  }
 
-    return REDISMODULE_OK;
+  return REDISMODULE_OK;
 }

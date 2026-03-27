@@ -15,6 +15,7 @@
  *************************************************************************/
 
 #include "len_test.h"
+
 #include "utils.h"
 
 namespace sw {
@@ -25,32 +26,32 @@ namespace pb {
 
 namespace test {
 
-void LenTest::_run(sw::redis::Redis &r) {
-    auto key = test_key("len");
+void LenTest::_run(sw::redis::Redis& r) {
+  auto key = test_key("len");
 
-    KeyDeleter deleter(r, key);
+  KeyDeleter deleter(r, key);
 
-    REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg",
-                R"({"sub" : {"s" : "hello"}, "arr" : [1, 2, 3], "m" : {"k1" : "v1", "k2" : "v2"}})") == 1,
-            "failed to test pb.len command");
+  REDIS_ASSERT(
+      r.command<long long>(
+          "PB.SET", key, "Msg",
+          R"({"sub" : {"s" : "hello"}, "arr" : [1, 2, 3], "m" : {"k1" : "v1", "k2" : "v2"}})") ==
+          1,
+      "failed to test pb.len command");
 
-    REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg",
-                "/sub/s") == 5,
-            "failed to test pb.len with string");
+  REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg", "/sub/s") == 5,
+               "failed to test pb.len with string");
 
-    REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg",
-                "/arr") == 3,
-            "failed to test pb.len with array");
+  REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg", "/arr") == 3,
+               "failed to test pb.len with array");
 
-    REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg",
-                "/m") == 2,
-            "failed to test pb.len with map");
+  REDIS_ASSERT(r.command<long long>("PB.LEN", key, "Msg", "/m") == 2,
+               "failed to test pb.len with map");
 }
 
-}
+}  // namespace test
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw

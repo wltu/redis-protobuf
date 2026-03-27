@@ -17,11 +17,13 @@
 #ifndef SEWENEW_REDISPROTOBUF_UTILS_H
 #define SEWENEW_REDISPROTOBUF_UTILS_H
 
+#include <google/protobuf/message.h>
+
 #include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <google/protobuf/message.h>
+
 #include "module_api.h"
 
 namespace sw {
@@ -37,132 +39,112 @@ using MsgUPtr = std::unique_ptr<gp::Message>;
 // By now, not all compilers support std::string_view,
 // so we make our own implementation.
 class StringView {
-public:
-    constexpr StringView() noexcept = default;
+ public:
+  constexpr StringView() noexcept = default;
 
-    constexpr StringView(const char *data, std::size_t size) : _data(data), _size(size) {}
+  constexpr StringView(const char* data, std::size_t size)
+      : _data(data), _size(size) {}
 
-    StringView(const char *data) : _data(data), _size(std::strlen(data)) {}
+  StringView(const char* data) : _data(data), _size(std::strlen(data)) {}
 
-    StringView(const std::string &str) : _data(str.data()), _size(str.size()) {}
+  StringView(const std::string& str) : _data(str.data()), _size(str.size()) {}
 
-    StringView(RedisModuleString *str);
+  StringView(RedisModuleString* str);
 
-    constexpr StringView(const StringView &) noexcept = default;
+  constexpr StringView(const StringView&) noexcept = default;
 
-    StringView& operator=(const StringView &) noexcept = default;
+  StringView& operator=(const StringView&) noexcept = default;
 
-    constexpr const char* data() const noexcept {
-        return _data;
-    }
+  constexpr const char* data() const noexcept { return _data; }
 
-    constexpr std::size_t size() const noexcept {
-        return _size;
-    }
+  constexpr std::size_t size() const noexcept { return _size; }
 
-    constexpr bool empty() const noexcept {
-        return _size == 0;
-    }
+  constexpr bool empty() const noexcept { return _size == 0; }
 
-private:
-    const char *_data = nullptr;
-    std::size_t _size = 0;
+ private:
+  const char* _data = nullptr;
+  std::size_t _size = 0;
 };
 
 template <typename T>
 class Optional {
-public:
-    Optional() = default;
+ public:
+  Optional() = default;
 
-    Optional(const Optional &) = default;
-    Optional& operator=(const Optional &) = default;
+  Optional(const Optional&) = default;
+  Optional& operator=(const Optional&) = default;
 
-    Optional(Optional &&) = default;
-    Optional& operator=(Optional &&) = default;
+  Optional(Optional&&) = default;
+  Optional& operator=(Optional&&) = default;
 
-    ~Optional() = default;
+  ~Optional() = default;
 
-    template <typename ...Args>
-    explicit Optional(Args &&...args) : _value(true, T(std::forward<Args>(args)...)) {}
+  template <typename... Args>
+  explicit Optional(Args&&... args)
+      : _value(true, T(std::forward<Args>(args)...)) {}
 
-    explicit operator bool() const {
-        return _value.first;
-    }
+  explicit operator bool() const { return _value.first; }
 
-    T& value() {
-        return _value.second;
-    }
+  T& value() { return _value.second; }
 
-    const T& value() const {
-        return _value.second;
-    }
+  const T& value() const { return _value.second; }
 
-    T* operator->() {
-        return &(_value.second);
-    }
+  T* operator->() { return &(_value.second); }
 
-    const T* operator->() const {
-        return &(_value.second);
-    }
+  const T* operator->() const { return &(_value.second); }
 
-    T& operator*() {
-        return _value.second;
-    }
+  T& operator*() { return _value.second; }
 
-    const T& operator*() const {
-        return _value.second;
-    }
+  const T& operator*() const { return _value.second; }
 
-    void reset() noexcept {
-        _value.first = false;
-    }
+  void reset() noexcept { _value.first = false; }
 
-private:
-    std::pair<bool, T> _value;
+ private:
+  std::pair<bool, T> _value;
 };
 
 namespace util {
 
-std::string msg_to_json(const gp::Message &msg);
+std::string msg_to_json(const gp::Message& msg);
 
-int32_t sv_to_int32(const StringView &sv);
+int32_t sv_to_int32(const StringView& sv);
 
-int64_t sv_to_int64(const StringView &sv);
+int64_t sv_to_int64(const StringView& sv);
 
-uint32_t sv_to_uint32(const StringView &sv);
+uint32_t sv_to_uint32(const StringView& sv);
 
-uint64_t sv_to_uint64(const StringView &sv);
+uint64_t sv_to_uint64(const StringView& sv);
 
-double sv_to_double(const StringView &sv);
+double sv_to_double(const StringView& sv);
 
-float sv_to_float(const StringView &sv);
+float sv_to_float(const StringView& sv);
 
-bool sv_to_bool(const StringView &sv);
+bool sv_to_bool(const StringView& sv);
 
-std::string sv_to_string(const StringView &sv);
+std::string sv_to_string(const StringView& sv);
 
-bool str_case_equal(const StringView &s1, const StringView &s2);
+bool str_case_equal(const StringView& s1, const StringView& s2);
 
-}
+}  // namespace util
 
 namespace io {
 
-bool is_regular(const std::string &file);
+bool is_regular(const std::string& file);
 
-bool is_directory(const std::string &file);
+bool is_directory(const std::string& file);
 
-std::vector<std::string> list_dir(const std::string &path);
+std::vector<std::string> list_dir(const std::string& path);
 
-std::string extension(const std::string &file);
+std::string extension(const std::string& file);
 
-void remove_file(const std::string &path);
+void remove_file(const std::string& path);
 
-}
+}  // namespace io
 
-}
+}  // namespace pb
 
-}
+}  // namespace redis
 
-}
+}  // namespace sw
 
-#endif // end SEWENEW_REDISPROTOBUF_UTILS_H
+#endif  // end SEWENEW_REDISPROTOBUF_UTILS_H
