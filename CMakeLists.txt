@@ -37,6 +37,47 @@ set_target_properties(${SHARED_LIB} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} VERSI
 
 set_target_properties(${SHARED_LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 
+option(BUILD_TESTS "Build tests" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+
+    # Find redis++
+    # Assuming it installs a cmake config or we can use find_package
+    find_package(redis++ REQUIRED)
+    find_package(hiredis REQUIRED)
+
+    # Test source files
+    file(GLOB TEST_SOURCE_FILES "test/src/sw/redis-protobuf/*.cpp")
+
+    # Find protoc
+    find_program(PROTOC_EXECUTABLE protoc REQUIRED)
+
+    set(PROTO_SRC "${CMAKE_CURRENT_BINARY_DIR}/example.pb.cc")
+    set(PROTO_HDR "${CMAKE_CURRENT_BINARY_DIR}/example.pb.h")
+
+    add_custom_command(
+        OUTPUT "${PROTO_SRC}" "${PROTO_HDR}"
+        COMMAND ${PROTOC_EXECUTABLE}
+        ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}" -I "${CMAKE_SOURCE_DIR}/docker" "${CMAKE_SOURCE_DIR}/docker/example.proto"
+        DEPENDS "${CMAKE_SOURCE_DIR}/docker/example.proto"
+        COMMENT "Generating C++ files for example.proto"
+    )
+
+    # Add test executable
+    add_executable(redis_protobuf_test ${TEST_SOURCE_FILES} "${PROTO_SRC}")
+
+    # Include directories
+    target_include_directories(redis_protobuf_test PRIVATE src ${CMAKE_CURRENT_BINARY_DIR})
+
+    # Link libraries
+    target_link_libraries(redis_protobuf_test PRIVATE 
+        redis++
+        protobuf::libprotobuf
+        hiredis
+    )
+endif()
+
 include(GNUInstallDirs)
 
 # Install shared lib.

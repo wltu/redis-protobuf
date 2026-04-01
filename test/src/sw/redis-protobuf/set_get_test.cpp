@@ -18,6 +18,7 @@
 
 #include <iostream>
 
+#include "example.pb.h"
 #include "utils.h"
 
 namespace sw {
@@ -78,6 +79,33 @@ void SetGetTest::_run(sw::redis::Redis& r) {
   REDIS_ASSERT(r.command<long long>("PB.SET", key, "--NX", "Msg", "/sub/s",
                                     "world") == 0,
                "failed to test pb.set and pb.get command");
+
+  REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg", "/f32", 123) == 1 &&
+                   r.command<long long>("PB.GET", key, "Msg", "/f32") == 123,
+               "failed to test pb.set and pb.get for fixed32");
+
+  REDIS_ASSERT(r.command<long long>("PB.SET", key, "Msg", "/f64", 456) == 1 &&
+                   r.command<long long>("PB.GET", key, "Msg", "/f64") == 456,
+               "failed to test pb.set and pb.get for fixed64");
+
+  REDIS_ASSERT(
+      r.command<long long>("PB.SET", key, "TestValue", "/f32", 123) == 1 &&
+          r.command<long long>("PB.GET", key, "TestValue", "/f32") == 123,
+      "failed to test pb.set and pb.get for fixed32");
+  REDIS_ASSERT(
+      r.command<long long>("PB.SET", key, "TestValue", "/f64", 456) == 1 &&
+          r.command<long long>("PB.GET", key, "TestValue", "/f64") == 456,
+      "failed to test pb.set and pb.get for fixed32");
+
+  Msg test_value;
+  test_value.set_f64(789);
+  test_value.set_f32(321);
+  REDIS_ASSERT(
+      r.command<long long>("PB.SET", key, "Msg",
+                           test_value.SerializeAsString()) == 1 &&
+          r.command<long long>("PB.GET", key, "Msg", "/f32") == 321 &&
+          r.command<long long>("PB.GET", key, "TestValue", "/f64") == 789,
+      "failed to test pb.set and pb.get for fixed32");
 }
 
 }  // namespace test

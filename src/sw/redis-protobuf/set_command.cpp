@@ -105,7 +105,10 @@ SetCommand::Args SetCommand::_parse_args(RedisModuleString** argv,
       throw Error("null string");
     }
     path = Path(RedisModule_StringPtrLen(argv[pos], nullptr));
-    val = RedisModule_StringPtrLen(argv[pos + 1], nullptr);
+
+    size_t len = 0;
+    const char* ptr = RedisModule_StringPtrLen(argv[pos + 1], &len);
+    val = std::string_view(ptr, len);
   } else {
     if (argv[pos] == nullptr || argv[pos + 1] == nullptr ||
         argv[pos + 2] == nullptr) {
@@ -113,7 +116,10 @@ SetCommand::Args SetCommand::_parse_args(RedisModuleString** argv,
     }
     path = Path(RedisModule_StringPtrLen(argv[pos], nullptr),
                 RedisModule_StringPtrLen(argv[pos + 1], nullptr));
-    val = RedisModule_StringPtrLen(argv[pos + 2], nullptr);
+
+    size_t len = 0;
+    const char* ptr = RedisModule_StringPtrLen(argv[pos + 2], &len);
+    val = std::string_view(ptr, len);
   }
 
   args.path = std::move(path);

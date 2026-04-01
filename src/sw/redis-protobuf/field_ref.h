@@ -409,11 +409,6 @@ class FieldRef {
                                  const gp::FieldDescriptor* field_desc,
                                  const gp::MapKey& key) {
     auto reflection = msg->GetReflection();
-    if (!gp::MapReflectionTester::ContainsMapKey(reflection, *msg, field_desc,
-                                                 key)) {
-      throw NotFoundError();
-    }
-
     gp::MapValueRef val;
     gp::MapReflectionTester::InsertOrLookupMapValue(reflection, msg, field_desc,
                                                     key, &val);

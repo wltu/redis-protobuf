@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2023";
 
 //package sw.redis.pb;
 
@@ -12,4 +12,6 @@ message Msg {
     SubMsg sub = 2;
     repeated int32 arr = 3;
     map<string, string> m = 4;
+    fixed32 f32 = 5;
+    fixed64 f64 = 6;
 }
